@@ -112,7 +112,7 @@ func parseIndex(strIndex string) (uint32, error) {
 	if strIndex == "N" {
 		return math.MaxUint32, nil
 	}
-	i64, err := strconv.ParseUint(strIndex, 10, 0)
+	i64, err := strconv.ParseUint(strIndex, 10, 32)
 	if err != nil {
 		return 0, err
 	}

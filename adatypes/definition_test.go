@@ -1587,7 +1587,8 @@ func TestDefinitionPEMUFieldSingle(t *testing.T) {
 
 }
 
-func TestDefinitionPEMUFieldTwo(t *testing.T) {
+// TODO provide multiple MU index read
+func xTestDefinitionPEMUFieldTwo(t *testing.T) {
 	err := initLogWithFile("definition.log")
 	if !assert.NoError(t, err) {
 		return
@@ -1595,7 +1596,7 @@ func TestDefinitionPEMUFieldTwo(t *testing.T) {
 	Central.Log.Infof("TEST: %s", t.Name())
 
 	testDefinition := createPeriodGroupMultiplerLobField()
-	err = testDefinition.ShouldRestrictToFields("GM[1,2],GM[1,11]")
+	err = testDefinition.ShouldRestrictToFields("GM[1,3],GM[1,11]")
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -1625,12 +1626,13 @@ func TestDefinitionPEMUFieldTwo(t *testing.T) {
 		sc.String())
 	// fmt.Printf("%T %s -> %v - [%s][%s]", sc, sc, scerr, sc.PartialRange().FormatBuffer(), sc.PeriodicRange().FormatBuffer())
 
-	assert.Equal(t, "GM1(2),0,A,GM1(11),0,A.",
+	assert.Equal(t, "GML1(3),4,GM1(3)(1,4096),GML1(11),4,GM1(11)(1,4096).",
 		request.FormatBuffer.String())
 
 }
 
-func TestDefinitionPEMUFieldTwoPeriods(t *testing.T) {
+// TODO provide multiple PE index read
+func xTestDefinitionPEMUFieldTwoPeriods(t *testing.T) {
 	err := initLogWithFile("definition.log")
 	if !assert.NoError(t, err) {
 		return
@@ -1668,7 +1670,7 @@ func TestDefinitionPEMUFieldTwoPeriods(t *testing.T) {
 		sc.String())
 	// fmt.Printf("%T %s -> %v - [%s][%s]", sc, sc, scerr, sc.PartialRange().FormatBuffer(), sc.PeriodicRange().FormatBuffer())
 
-	assert.Equal(t, "GM1(2),0,A,GM2(11),0,A.",
+	assert.Equal(t, "GML1(3),4,GM1(3)(1,4096),GML2(11),4,GM2(11)(1,4096).",
 		request.FormatBuffer.String())
 
 }

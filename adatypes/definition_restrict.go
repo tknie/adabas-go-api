@@ -243,7 +243,9 @@ func searchFieldToSetRemoveFlagTrav(adaType IAdaType, parentType IAdaType, level
 		fieldMap.evaluateTopLevelStructure(adaType.Level())
 
 		if queryField != nil && len(queryField.fieldRange) > 0 {
-			Central.Log.Debugf("Field range for %s -> %s %T", adaType.Name(), queryField.fieldRange[0].FormatBuffer(), adaType)
+			Central.Log.Debugf("Field range for %s -> %s(%d) %T",
+				adaType.Name(), queryField.fieldRange[0].FormatBuffer(),
+				len(queryField.fieldRange), adaType)
 			index := 0
 			t := adaType.(*AdaType)
 
