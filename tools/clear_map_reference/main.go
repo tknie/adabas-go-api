@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -72,7 +72,7 @@ func initLogLevelWithFile(fileName string, level zapcore.Level) (err error) {
 
 	sugar := logger.Sugar()
 
-	sugar.Infof("Start logging with level", level)
+	sugar.Infof("Start logging with level %v", level)
 	adatypes.Central.Log = sugar
 
 	return

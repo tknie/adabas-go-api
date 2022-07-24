@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -89,18 +89,18 @@ func (value *byteArrayValue) SetStringValue(stValue string) {
 			case len(value.value) >= 8:
 				endian().PutUint64(value.value, iv)
 			case len(value.value) >= 4:
-				if iv < 0 || iv > math.MaxUint32 {
+				if iv > math.MaxUint32 {
 					return
 				}
 
 				endian().PutUint32(value.value, uint32(iv))
 			case len(value.value) >= 2:
-				if iv < 0 || iv > math.MaxUint64 {
+				if iv > math.MaxUint16 {
 					return
 				}
 				endian().PutUint16(value.value, uint16(iv))
 			case len(value.value) >= 1:
-				x, aerr := strconv.Atoi(stValue)
+				x, aerr := strconv.ParseInt(stValue, 0, 64)
 				if aerr != nil {
 					return
 				}

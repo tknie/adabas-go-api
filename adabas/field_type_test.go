@@ -1,5 +1,5 @@
 /*
-* Copyright © 2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2019-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -215,7 +215,9 @@ func TestFieldTypeRead(t *testing.T) {
 		return
 	}
 	if assert.NotNil(t, result) {
-		assert.Equal(t, 2, len(result.Values))
+		if !assert.Equal(t, 2, len(result.Values)) {
+			return
+		}
 		assert.Equal(t, 2, result.NrRecords())
 		//err = result.DumpValues()
 		//assert.NoError(t, err)

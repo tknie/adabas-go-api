@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -189,7 +189,7 @@ func TestStringLBFormatBufferVariable(t *testing.T) {
 	option := &BufferOption{}
 	var buffer bytes.Buffer
 	len := adaValue.FormatBuffer(&buffer, option)
-	assert.Equal(t, "XXL,4,XX(0,4096)", buffer.String())
+	assert.Equal(t, "XXL,4,XX(1,4096)", buffer.String())
 	assert.Equal(t, uint32(4100), len)
 }
 

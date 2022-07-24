@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -54,7 +54,7 @@ func (value *byteValue) Bytes() []byte {
 }
 
 func (value *byteValue) SetStringValue(stValue string) {
-	iv, err := strconv.Atoi(stValue)
+	iv, err := strconv.ParseInt(stValue, 0, 64)
 	if err == nil {
 		if iv < math.MinInt8 || iv > math.MaxInt8 {
 			return
@@ -95,7 +95,7 @@ func (value *byteValue) SetValue(v interface{}) error {
 	// case string:
 	case reflect.String:
 		sv := v.(string)
-		ba, err := strconv.Atoi(sv)
+		ba, err := strconv.ParseInt(sv, 0, 64)
 		if err != nil {
 			return err
 		}
@@ -194,7 +194,7 @@ func (value *ubyteValue) Bytes() []byte {
 }
 
 func (value *ubyteValue) SetStringValue(stValue string) {
-	iv, err := strconv.Atoi(stValue)
+	iv, err := strconv.ParseInt(stValue, 0, 64)
 	if err == nil {
 		if iv < 0 || iv > math.MaxUint8 {
 			return // NewGenericError(117, val)
@@ -220,7 +220,7 @@ func (value *ubyteValue) SetValue(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	if val < 0 || val > math.MaxUint8 {
+	if val > math.MaxUint8 {
 		return NewGenericError(117, val)
 	}
 

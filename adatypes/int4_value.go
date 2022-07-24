@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -55,7 +55,7 @@ func (value *uint32Value) Bytes() []byte {
 }
 
 func (value *uint32Value) SetStringValue(stValue string) {
-	iv, err := strconv.Atoi(stValue)
+	iv, err := strconv.ParseInt(stValue, 0, 64)
 	if err == nil {
 		if iv < 0 || iv > math.MaxUint32 {
 			return
@@ -69,7 +69,7 @@ func (value *uint32Value) SetValue(v interface{}) error {
 	if err != nil {
 		return err
 	}
-	if x >= 0 && x <= math.MaxUint32 {
+	if x <= math.MaxUint32 {
 		value.value = uint32(x)
 		return nil
 	}

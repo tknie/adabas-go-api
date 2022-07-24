@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -41,4 +41,30 @@ func TestMapRepositoryReadAll(t *testing.T) {
 	for _, m := range adabasMaps {
 		fmt.Println(m.Name)
 	}
+}
+
+func TestMapRepositoryRead(t *testing.T) {
+	initTestLogWithFile(t, "map_repositories.log")
+
+	adatypes.Central.Log.Infof("TEST: %s", t.Name())
+	adabas, _ := NewAdabas(23)
+	defer adabas.Close()
+	mr := NewMapRepository(adabas, 4)
+	employeeMap, serr := mr.SearchMap(adabas, "EMPLOYEES-NAT-DDM")
+	assert.NotNil(t, employeeMap)
+	assert.NoError(t, serr)
+	// fmt.Println(">", employeeMap.String())
+	// adabasMaps, err := mr.LoadAllMaps(adabas)
+	// assert.NoError(t, err)
+	// assert.NotNil(t, adabasMaps)
+	// assert.NotEqual(t, 0, len(adabasMaps))
+	// for _, m := range adabasMaps {
+	// 	if m.Name == "EMPLOYEES-NAT-DDM" {
+	// 		employeeMap = m
+	// 	}
+	// }
+	// fmt.Println(">", employeeMap.String())
+	x := employeeMap.fieldMap["AA"]
+	assert.NotNil(t, x)
+	// fmt.Printf("%#v", x)
 }

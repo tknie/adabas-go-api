@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -52,7 +52,7 @@ func (s *Stack) Pop() (interface{}, error) {
 
 	l := len(s.s)
 	if l == 0 {
-		return nil, errors.New("Empty Stack")
+		return nil, errors.New("empty Stack")
 	}
 
 	res := s.s[l-1]

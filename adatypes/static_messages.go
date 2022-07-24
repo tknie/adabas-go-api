@@ -131,7 +131,7 @@ var staticMessages = []struct {
 	{"ADAGE0F080", "de", "Reptor: Conversion to Open Systems FDT failed"},
 	{"ADAGE0F081", "de", "Reptor: Converted FDT exceeds buffer"},
 	{"ADAGE10000", "de", "Ein Teilkommand des MC Kommandos ist fehl geschlagen"},
-	{"ADAGE11000", "de", "Falscher oder nicht authorizierte File-Nummer"},
+	{"ADAGE11000", "de", "Falsche oder nicht authorizierte File-Nummer"},
 	{"ADAGE11001", "de", "The program tried to access system file 1 or 2, and no OP command was issued."},
 	{"ADAGE11002", "de", "The program tried to access system file 1 or 2, and the user is not authorized."},
 	{"ADAGE11004", "de", "One of the following occurred:- The specified file number is invalid. The file number might be equal to '0' or greater than the maximum allowed. When running with ADARUN DTP={RM | TM}, an attempt was made by a non-Adabas Transaction Manager user to access/update an Adabas Transaction Manager system file."},
@@ -1752,4 +1752,7 @@ var staticMessages = []struct {
 	{"ADG0000181", "en", "Too many occurrence entries"},
 	{"ADG0000182", "en", "Occurence for {0} exceed to {1}"},
 	{"ADG0000183", "en", "Searched LOB entry not found"},
+	{"ADG0000184", "en", "Searched LOB field {0} not in definition"},
+	{"ADG0000185", "en", "Searched field {0} not a Large object (LOB)"},
+	{"ADG0000186", "en", "Searched field query empty"},
 }

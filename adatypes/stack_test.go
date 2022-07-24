@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -33,6 +33,6 @@ func TestStack(t *testing.T) {
 	assert.Equal(t, "ABC", v)
 	v, err = st.Pop()
 	assert.Error(t, err)
-	assert.Equal(t, "Empty Stack", err.Error())
+	assert.Equal(t, "empty Stack", err.Error())
 	assert.Nil(t, v)
 }

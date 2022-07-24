@@ -1,5 +1,5 @@
 /*
-* Copyright © 2018-2019 Software AG, Darmstadt, Germany and/or its licensors
+* Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -336,7 +336,11 @@ func TestRequestResultWithMUWithContent(t *testing.T) {
 			fmt.Println("Set MU error", err)
 			return
 		}
+		adatypes.Central.Log.Infof("Done set MU entry of %d", (i + 1))
 	}
+	fmt.Println("Dump values")
+	d.DumpValues(false)
+	fmt.Println("Set normal field values")
 	err = record.SetValue("AA", 2)
 	if !assert.NoError(t, err) {
 		fmt.Println("Set PA error", err)
@@ -567,7 +571,7 @@ func ExampleRecord_setValue() {
 	//   AA = > 2 <
 	//   PE = [ 3 ]
 	//    PP[01] = > 1 <
-	//    MU[01] = [ 1 ]
+	//    MU[01] = [ 2 ]
 	//     MU[01,01] = > 100 <
 	//     MU[01,02] = > 122 <
 	//    GR[01] = [ 1 ]

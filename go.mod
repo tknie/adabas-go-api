@@ -3,6 +3,7 @@ module github.com/tknie/adabas-go-api
 go 1.14
 
 require (
+	github.com/SoftwareAG/adabas-go-api v1.6.18
 	github.com/golangci/golangci-lint v1.47.2 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/profile v1.6.0
