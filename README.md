@@ -50,7 +50,7 @@ This is a list of features which the Adabas API for Go supports:
 Inside the code the Adabas API for Go can be used importing the Go API. Beside the API, some small sample applications are provided in GitHub. These examples of the Adabas API for Go can be downloaded using the `go get` command:
 
 ```bash
-go get -u github.com/softwareag/adabas-go-api/adabas
+go get -u github.com/tknie/adabas-go-api/adabas
 ```
 
 You can compile it with the new Adabas TCP/IP interface on Linux, Unix and Windows. In this case no additional native library is needed. This is the default behavior.
