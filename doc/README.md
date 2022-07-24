@@ -36,13 +36,13 @@ The remote Adabas TCP/IP connection does not use the Adabas client library. To a
 Adabas API for Go can be download using the `go get` command:
 
 ```bash
-go get -u github.com/SoftwareAG/adabas-go-api/adabas
+go get -u github.com/tknie/adabas-go-api/adabas
 ```
 
 To compile included query tools, use `git` to clone the complete repository
 
 ```git
-git clone https://github.com/SoftwareAG/adabas-go-api.git
+git clone https://github.com/tknie/adabas-go-api.git
 ```
 
 The API runtime can be compiled with the Adabas TCP/IP interface only or using Adabas local access with Adabas Client native libraries. By default the Adabas TCP/IP interface is compiled only. To enable the Adabas Client native link to Adabas you need to provide the Go build tag `adalnk` and the CGO compile flags defining build flags for the Adabas Client library. If the Adabas environment is sourced, you can define CGO compile flags as follows:

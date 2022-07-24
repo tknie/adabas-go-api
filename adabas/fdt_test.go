@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
 	"github.com/stretchr/testify/assert"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 var employeeFdt = []byte{68, 2, 0, 0, 0, 0, 34, 0, 104, 91, 138, 78, 61, 254, 4, 0, 70, 16, 65, 65, 65, 129, 0, 1, 0, 0, 0, 0, 8, 0, 0, 0,

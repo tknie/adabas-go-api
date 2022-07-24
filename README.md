@@ -21,7 +21,7 @@
 
 This package is designed for using Adabas databases from Go. It's an data interface to Adabas. You can find a detailed overview about the design and technical implementation [here](.//doc//Overview.md).
 
-For details have a look at the API documentation. It can be referenced here: <https://godoc.org/github.com/SoftwareAG/adabas-go-api/adabas>
+For details have a look at the API documentation. It can be referenced here: <https://godoc.org/github.com/tknie/adabas-go-api/adabas>
 
 ## Features
 
@@ -98,7 +98,7 @@ In the first example a logical read on the database file uses Adabas maps:
 
 ```go
 import (
-  "github.com/SoftwareAG/adabas-go-api/adabas"
+  "github.com/tknie/adabas-go-api/adabas"
 )
 // Create new connection handler using the Adabas Map repository in database 24 file 4
 connection, _ := adabas.NewConnection("acj;map;config=[24,4]")
@@ -262,9 +262,3 @@ Step by step all relevant Adabas features are or will be supported.
 
 ______________________
 These tools are provided as-is and without warranty or support. They do not constitute part of the Software AG product suite. Users are free to use, fork and modify them, subject to the license agreement. While Software AG welcomes contributions, we cannot guarantee to include every contribution in the master project.
-______________
-For more information you can Ask a Question in the [TECHcommunity Forums](https://tech.forums.softwareag.com/tag/adabas).
-
-You can find additional information in the [Software AG TECHcommunity](http://techcommunity.softwareag.com/home/-/product/name/adabas).
-______________
-Contact us at [TECHcommunity](mailto:technologycommunity@softwareag.com?subject=Github/SoftwareAG) if you have any questions.

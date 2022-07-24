@@ -28,7 +28,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 var idCounter uint32

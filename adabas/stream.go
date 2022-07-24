@@ -20,7 +20,7 @@
 package adabas
 
 import (
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // ReadLobStream reads field data using partial lob reads and provide it

@@ -25,7 +25,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // MapFile parse map JSON import/export files

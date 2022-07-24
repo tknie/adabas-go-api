@@ -26,7 +26,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 const acbxEyecatcher = 'F' /*      F - EYECATCHER              */

@@ -40,7 +40,7 @@
 //
 // To use local IPC or Entire Net-Work client related Adabas access, please compile Adabas GO API with
 // ADALNK library references.
-// See documentation here: https://github.com/SoftwareAG/adabas-go-api
+// See documentation here: https://github.com/tknie/adabas-go-api
 //
 // Example
 //
@@ -67,13 +67,13 @@
 //
 // You may read using search values and descriptor sorted searches.
 // The received records can be analyzed using traversation logic.
-// See documentation here:  https://github.com/SoftwareAG/adabas-go-api/blob/master/doc/QUERY.md
+// See documentation here:  https://github.com/tknie/adabas-go-api/blob/master/doc/QUERY.md
 //
 // Adabas maps
 //
 // For long name and database name usage, a new Adabas map concept is introduced. The Adabas maps
 // are stored inside the database.
-// See documentation here: https://github.com/SoftwareAG/adabas-go-api/blob/master/doc/AdabasMap.md
+// See documentation here: https://github.com/tknie/adabas-go-api/blob/master/doc/AdabasMap.md
 //
 // Stream
 //

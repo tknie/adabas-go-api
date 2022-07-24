@@ -27,7 +27,7 @@ import (
 	"syscall"
 	"unsafe"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 var (

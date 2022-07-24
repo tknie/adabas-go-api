@@ -25,8 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
 	"github.com/stretchr/testify/assert"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 func TestHoldResponse(t *testing.T) {

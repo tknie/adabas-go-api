@@ -20,7 +20,7 @@
 package adabas
 
 import (
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // UpdateLOBRecord update lob records in an stream, call will write segment to offset of LOB

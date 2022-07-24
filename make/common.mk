@@ -33,6 +33,7 @@ GO_FLAGS        = $(if $(debug),"-x",) -tags $(GO_TAGS)
 BINTESTS        = $(CURDIR)/bin/tests/$(GOOS)_$(GOARCH)
 DYLD_LIBRARY_PATH = $(ACLDIR)/lib:/lib:/usr/lib:$(ACLDIR)/../common/security/openssl/lib
 GOEXE          ?= $(shell $(GO) env GOEXE)
+GOBIN          ?= $(shell $(GO) env GOPATH)/bin
 
 export DYLD_LIBRARY_PATH
 
@@ -81,6 +82,9 @@ $(BIN):
 	@mkdir -p $@
 
 $(BIN)/%: $(BIN); $(info $(M) building $(REPOSITORY)…)
+	go install $(REPOSITORY)
+
+$(BIN)/%: $(BIN); $(info $(M) building $(REPOSITORY)…)
 	$Q tmp=$$(mktemp -d); \
 		(GO111MODULE=off GOPATH=$$tmp CGO_CFLAGS= CGO_LDFLAGS= \
 		go get $(REPOSITORY) && cp -r $$tmp/bin/* $(BIN)/.) || ret=$$?; \
@@ -100,8 +104,8 @@ $(BINTESTS):
 	@mkdir -p $@
 
 # Tools
-GOLINT = $(BINTOOLS)/golint
-$(BINTOOLS)/golint: REPOSITORY=golang.org/x/lint/golint
+GOLINT = $(GOBIN)/golint
+$(GOBIN)/golint: REPOSITORY=golang.org/x/lint/golint
 
 GOCILINT = $(BINTOOLS)/golangci-lint
 $(BINTOOLS)/golangci-lint: REPOSITORY=github.com/golangci/golangci-lint/cmd/golangci-lint
@@ -257,7 +261,7 @@ help:
 
 .PHONY: doc
 doc: ; $(info $(M) running GODOC…) @ ## Run go doc on all source files
-	$Q cd $(CURDIR) && echo "Open http://localhost:6060/pkg/github.com/SoftwareAG/adabas-go-api/" && \
+	$Q cd $(CURDIR) && echo "Open http://localhost:6060/pkg/github.com/tknie/adabas-go-api/" && \
 	   GOPATH=$(GOPATH) \
 	    CGO_CFLAGS="$(CGO_CFLAGS)" CGO_LDFLAGS="$(CGO_LDFLAGS) $(CGO_EXT_LDFLAGS)" $(GODOC) -http=:6060 -v
 #	    CGO_CFLAGS="$(CGO_CFLAGS)" CGO_LDFLAGS="$(CGO_LDFLAGS) $(CGO_EXT_LDFLAGS)" $(GO) doc $(PACKAGE)

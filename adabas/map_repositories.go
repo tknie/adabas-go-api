@@ -27,7 +27,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // DatabaseURL defines the target URL of a database file. Might be a database data file or a map repository

@@ -29,7 +29,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // BuildDate build date

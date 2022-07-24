@@ -26,9 +26,10 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"time"
 	"unsafe"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // BufferType type of buffer following
@@ -289,6 +290,11 @@ func (connection *AdaTCP) tcpConnect() (err error) {
 	default:
 		return adatypes.NewGenericError(131)
 	}
+	err = connection.connection.SetReadDeadline(time.Now().Add(5 * time.Second))
+	if err != nil {
+		adatypes.Central.Log.Debugf("SetReadDeadline failed: %v", err)
+		return adatypes.NewGenericError(131)
+	}
 	header := NewAdatcpHeader(ConnectRequest)
 	payload := AdaTCPConnectPayload{Charset: adatcpASCII8, Floatingpoint: adatcpFloatIEEE}
 	copy(payload.Userid[:], connection.id.user[:])
@@ -347,6 +353,11 @@ func (connection *AdaTCP) tcpConnect() (err error) {
 	_, err = io.ReadFull(connection.connection, rcvBuffer)
 	//	_, err = connection.connection.Read(rcvBuffer)
 	if err != nil {
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			adatypes.Central.Log.Debugf("Error TCP timeout: %v", err)
+			connection.connection.Close()
+			connection.connection = nil
+		}
 		adatypes.Central.Log.Debugf("Error TCP reading data %v", err)
 		connection.connection.Close()
 		connection.connection = nil

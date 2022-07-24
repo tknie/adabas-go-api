@@ -33,9 +33,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/SoftwareAG/adabas-go-api/adabas"
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
 	"github.com/pkg/profile"
+	"github.com/tknie/adabas-go-api/adabas"
+	"github.com/tknie/adabas-go-api/adatypes"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

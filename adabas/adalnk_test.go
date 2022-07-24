@@ -25,9 +25,9 @@ package adabas
 import (
 	"testing"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 func TestAdabasLnkOk(t *testing.T) {

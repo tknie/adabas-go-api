@@ -20,7 +20,7 @@
 package adabas
 
 import (
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // Cursoring the structure support cursor instance handling reading record list in

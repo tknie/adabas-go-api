@@ -22,7 +22,7 @@ package adabas
 import (
 	"strconv"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // DeleteRequest request instance handling data store and update

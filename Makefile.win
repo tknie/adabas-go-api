@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 
-PACKAGE     = github.com/SoftwareAG/adabas-go-api
+PACKAGE     = github.com/tknie/adabas-go-api
 DATE       ?= $(shell date +%FT%T%z)
 VERSION    ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || \
 			cat $(CURDIR)/.version 2> /dev/null || echo v0)

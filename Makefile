@@ -16,7 +16,7 @@
 #   limitations under the License.
 #
 
-PACKAGE       = github.com/SoftwareAG/adabas-go-api
+PACKAGE       = github.com/tknie/adabas-go-api
 TESTPKGSDIR   = adabas adatypes
 
 GOARCH      ?= $(shell $(GO) env GOARCH)

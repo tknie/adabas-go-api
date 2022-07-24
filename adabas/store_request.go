@@ -25,7 +25,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // StoreRequest request instance handling data store and update

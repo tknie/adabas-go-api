@@ -24,7 +24,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // createTypeInterface structure used to traverse through the field tree and create list of

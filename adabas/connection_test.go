@@ -33,7 +33,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 

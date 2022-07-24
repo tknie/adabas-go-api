@@ -23,7 +23,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/SoftwareAG/adabas-go-api/adabas"
+	"github.com/tknie/adabas-go-api/adabas"
 )
 
 func main() {

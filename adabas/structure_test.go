@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
 	"github.com/stretchr/testify/assert"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 func TestABD(t *testing.T) {

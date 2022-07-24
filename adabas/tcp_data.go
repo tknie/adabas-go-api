@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 const adatcpDataHeaderEyecatcher = "DATA"

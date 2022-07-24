@@ -29,7 +29,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // Record one result record of the result list received by

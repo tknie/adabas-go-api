@@ -24,7 +24,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // ExportMapRepository import map by file import
