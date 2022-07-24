@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adatypes"
 )
 
 // FieldQuery parse result of the field part of the query

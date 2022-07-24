@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/SoftwareAG/adabas-go-api/adabas"
-	"github.com/SoftwareAG/adabas-go-api/adatypes"
+	"github.com/tknie/adabas-go-api/adabas"
+	"github.com/tknie/adabas-go-api/adatypes"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
