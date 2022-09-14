@@ -882,7 +882,9 @@ func (request *ReadRequest) histogramWithWithParser(search string, resultParser 
 }
 
 // SearchAndOrder performs a search call and orders the result using defined descriptors
-//  A search term will
+//
+//	A search term will
+//
 // be used to search for and a descriptor defines the final result order.
 func (request *ReadRequest) SearchAndOrder(search, descriptors string) (result *Response, err error) {
 	result = &Response{Definition: request.definition}

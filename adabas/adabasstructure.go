@@ -32,8 +32,8 @@ import (
 
 const acbxEyecatcher = 'F' /*      F - EYECATCHER              */
 const acbxVersion = '2'    /*      2 - VERSION                 */
-//const eAcbxEyecatcher = 0xc6 /* EBCDIC F - EYECATCHER            */
-//const eAcbxVersion = 0xf2    /* EBCDIC 2 - VERSION               */
+// const eAcbxEyecatcher = 0xc6 /* EBCDIC F - EYECATCHER            */
+// const eAcbxVersion = 0xf2    /* EBCDIC 2 - VERSION               */
 const acbxLength = 192
 
 // Dbid Adabas database identifier

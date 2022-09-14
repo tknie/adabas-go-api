@@ -89,7 +89,8 @@ func LogMultiLineString(debug bool, logOutput string) {
 }
 
 // TimeTrack defer function measure the difference end log it to log management, like
-//    defer TimeTrack(time.Now(), "CallAdabas "+string(adabas.Acbx.Acbxcmd[:]))
+//
+//	defer TimeTrack(time.Now(), "CallAdabas "+string(adabas.Acbx.Acbxcmd[:]))
 func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
 	Central.Log.Infof("%s took %s", name, elapsed)

@@ -140,7 +140,7 @@ test-build: $(OBJECTS) $(BINTESTS) ; $(info $(M) building $(NAME:%=% )tests…) 
 	    TESTFILES=$(TESTFILES) GO_ADA_MESSAGES=$(MESSAGES) LOGPATH=$(LOGPATH) REFERENCES=$(REFERENCES) \
 	    $(GO) test -c -o $(BINTESTS)/$$pkg.test -tags $(GO_TAGS) ./$$pkg; done
 
-TEST_TARGETS := test-default test-bench test-short test-verbose test-race test-sanitizer
+TEST_TARGETS := test-default test-bench test-short test-json test-verbose test-race test-sanitizer
 .PHONY: $(TEST_TARGETS) check test tests
 test-bench:   ARGS=-run=__absolutelynothing__ -bench=. ## Run benchmarks
 test-short:   ARGS=-short        ## Run only short tests
