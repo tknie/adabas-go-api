@@ -26,6 +26,8 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"os"
+	"strconv"
 	"time"
 	"unsafe"
 
@@ -139,6 +141,33 @@ type AdaTCP struct {
 	clusterNodes        []*URL
 }
 
+var readDataTimeout = -1
+var writeDataTimeout = -1
+
+// init initialize TCP/IP timeout environment variables if set
+// - ADA_TCP_READ_TIMEOUT for seconds of the read timeout
+// - ADA_TCP_WRITE_TIMEOUT for seconds for the write timeout
+func init() {
+	readTimeout := os.Getenv("ADA_TCP_READ_TIMEOUT")
+	if readTimeout != "" {
+		x, err := strconv.Atoi(readTimeout)
+		if err == nil {
+			readDataTimeout = x
+		} else {
+			adatypes.Central.Log.Errorf("$ADA_TCP_READ_TIMEOUT not numeric: %v", err)
+		}
+	}
+	writeTimeout := os.Getenv("ADA_TCP_WRITE_TIMEOUT")
+	if writeTimeout != "" {
+		x, err := strconv.Atoi(writeTimeout)
+		if err == nil {
+			writeDataTimeout = x
+		} else {
+			adatypes.Central.Log.Errorf("$ADA_TCP_WRITE_TIMEOUT not numeric: %v", err)
+		}
+	}
+}
+
 func adatcpTCPClientHTON8(l uint64) uint64 {
 	return uint64(
 		((uint64(l) >> 56) & uint64(0x00000000000000ff)) | ((uint64(l) >> 40) & uint64(0x000000000000ff00)) | ((uint64(l) >> 24) & uint64(0x0000000000ff0000)) | ((uint64(l) >> 8) & uint64(0x00000000ff000000)) | ((uint64(l) << 8) & uint64(0x000000ff00000000)) | ((uint64(l) << 24) & uint64(0x0000ff0000000000)) | ((uint64(l) << 40) & uint64(0x00ff000000000000)) | ((uint64(l) << 56) & uint64(0xff00000000000000)))
@@ -199,7 +228,9 @@ func (connection *AdaTCP) Send(adaInstance *Adabas) (err error) {
 	}
 	err = adaInstance.WriteBuffer(&buffer, Endian(), false)
 	if err != nil {
-		adatypes.Central.Log.Debugf("Buffer transmit preparation error ", err)
+		if debug {
+			adatypes.Central.Log.Debugf("Buffer transmit preparation error ", err)
+		}
 		return
 	}
 	if debug {
@@ -208,7 +239,9 @@ func (connection *AdaTCP) Send(adaInstance *Adabas) (err error) {
 	}
 	err = connection.SendData(buffer, uint32(len(adaInstance.AdabasBuffers)))
 	if err != nil {
-		adatypes.Central.Log.Debugf("Transmit Adabas call error: %v", err)
+		if debug {
+			adatypes.Central.Log.Debugf("Transmit Adabas call error: %v", err)
+		}
 		_ = connection.Disconnect()
 		adaInstance.transactions.connection = nil
 		return
@@ -217,12 +250,16 @@ func (connection *AdaTCP) Send(adaInstance *Adabas) (err error) {
 	var nrAbdBuffers uint32
 	nrAbdBuffers, err = connection.ReceiveData(&buffer, adabasReply)
 	if err != nil {
-		adatypes.Central.Log.Debugf("Receive Adabas call error: %v", err)
+		if debug {
+			adatypes.Central.Log.Debugf("Receive Adabas call error: %v", err)
+		}
 		return
 	}
 	err = adaInstance.ReadBuffer(&buffer, Endian(), nrAbdBuffers, false)
 	if err != nil {
-		adatypes.Central.Log.Debugf("Read buffer error, destroy context ... %v", err)
+		if debug {
+			adatypes.Central.Log.Debugf("Read buffer error, destroy context ... %v", err)
+		}
 		_ = connection.Disconnect()
 		return
 	}
@@ -290,10 +327,20 @@ func (connection *AdaTCP) tcpConnect() (err error) {
 	default:
 		return adatypes.NewGenericError(131)
 	}
-	err = connection.connection.SetReadDeadline(time.Now().Add(5 * time.Second))
-	if err != nil {
-		adatypes.Central.Log.Debugf("SetReadDeadline failed: %v", err)
-		return adatypes.NewGenericError(131)
+	// if time out is needed set corresponding environment
+	if readDataTimeout > 0 {
+		err = connection.connection.SetReadDeadline(time.Now().Add(time.Duration(readDataTimeout) * time.Second))
+		if err != nil {
+			adatypes.Central.Log.Debugf("SetReadDeadline failed: %v", err)
+			return adatypes.NewGenericError(131)
+		}
+	}
+	if writeDataTimeout > 0 {
+		err = connection.connection.SetWriteDeadline(time.Now().Add(time.Duration(writeDataTimeout) * time.Second))
+		if err != nil {
+			adatypes.Central.Log.Debugf("SetWriteDeadline failed: %v", err)
+			return adatypes.NewGenericError(131)
+		}
 	}
 	header := NewAdatcpHeader(ConnectRequest)
 	payload := AdaTCPConnectPayload{Charset: adatcpASCII8, Floatingpoint: adatcpFloatIEEE}
@@ -350,8 +397,8 @@ func (connection *AdaTCP) tcpConnect() (err error) {
 		return
 	}
 	rcvBuffer := make([]byte, buffer.Len())
+	// Read and wait for buffer header, see deadline for timeouts
 	_, err = io.ReadFull(connection.connection, rcvBuffer)
-	//	_, err = connection.connection.Read(rcvBuffer)
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 			adatypes.Central.Log.Debugf("Error TCP timeout: %v", err)

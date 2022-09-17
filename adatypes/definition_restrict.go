@@ -43,6 +43,27 @@ type fieldMap struct {
 	stackStructure  *Stack
 }
 
+var reChanParser1 = make(chan *regexp.Regexp)
+
+const regularFieldParser1 = `(?P<field>[^\[\(\]\)]+)(\[(?P<if>[\dN]+),?(?P<it>[\dN]*)\])?(\((?P<ps>\d+),(?P<pt>\d+)\))?`
+
+var reChanParser2 = make(chan *regexp.Regexp)
+
+const regularFieldParser2 = `(?P<field>[^\[\(\]\),]+(\[[\dN]+\]\[[\dN]*\])?(\[[\dN]+,?[\dN]*\])?(\(\d+,\d+\))?),?`
+
+func init() {
+	go func() {
+		for {
+			reChanParser1 <- regexp.MustCompile(regularFieldParser1)
+		}
+	}()
+	go func() {
+		for {
+			reChanParser2 <- regexp.MustCompile(regularFieldParser2)
+		}
+	}()
+}
+
 // evaluateTopLevelStructure evaluate the structure node which is responsible
 // for the given level.
 func (fieldMap *fieldMap) evaluateTopLevelStructure(level uint8) {
@@ -372,7 +393,9 @@ func searchFieldToSetRemoveFlagTrav(adaType IAdaType, parentType IAdaType, level
 
 // ResetRestrictToFields reset restriction to all field of tree
 func (def *Definition) ResetRestrictToFields() {
-	Central.Log.Debugf("Reset active tree to complete")
+	if Central.IsDebugLevel() {
+		Central.Log.Debugf("Reset active tree to complete")
+	}
 	x := &StructureType{fieldMap: make(map[string]IAdaType)}
 	def.activeFieldTree = x
 	def.activeFields = make(map[string]IAdaType)
@@ -394,13 +417,16 @@ func (def *Definition) ShouldRestrictToFields(fields string) (err error) {
 	}
 	var field []string
 	if fields != "" {
-		var re = regexp.MustCompile(`(?P<field>[^\[\(\]\),]+(\[[\dN]+\]\[[\dN]*\])?(\[[\dN]+,?[\dN]*\])?(\(\d+,\d+\))?),?`)
+		re := <-reChanParser2
+		// regexp.MustCompile(regularFieldParser2)
 		mt := re.FindAllStringSubmatch(fields, -1)
 		for _, f := range mt {
 			field = append(field, f[1])
 		}
 	}
-	Central.Log.Debugf("Split field %s into slice to %#v", fields, field)
+	if Central.IsDebugLevel() {
+		Central.Log.Debugf("Split field %s into slice to %#v", fields, field)
+	}
 	return def.ShouldRestrictToFieldSlice(field)
 }
 
@@ -428,12 +454,18 @@ func (def *Definition) newFieldMap(field []string) (*fieldMap, error) {
 	fieldMap.parentStructure = NewStructure()
 	fieldMap.parentStructure.AddFlag(FlagOptionToBeRemoved)
 	fieldMap.lastStructure = fieldMap.parentStructure
+
+	// prepare debug check in loop
+	debug := Central.IsDebugLevel()
 	if len(field) != 0 {
 		for _, f := range field {
-			Central.Log.Debugf("Add to new Field %s to hash field", f)
+			if debug {
+				Central.Log.Debugf("Add to new Field %s to hash field", f)
+			}
 			fl := strings.Trim(f, " ")
 			if fl != "" {
-				var re = regexp.MustCompile(`(?P<field>[^\[\(\]\)]+)(\[(?P<if>[\dN]+),?(?P<it>[\dN]*)\])?(\((?P<ps>\d+),(?P<pt>\d+)\))?`)
+				// regular expression parse field
+				re := <-reChanParser1
 				mt := re.FindStringSubmatch(fl)
 
 				fl = mt[1]
@@ -472,7 +504,9 @@ func (def *Definition) newFieldMap(field []string) (*fieldMap, error) {
 			}
 		}
 	}
-	Central.Log.Debugf("Initialized field hash map of select fields")
+	if debug {
+		Central.Log.Debugf("Initialized field hash map of select fields")
+	}
 	return fieldMap, nil
 }
 
@@ -495,7 +529,8 @@ func (def *Definition) RestrictFieldSlice(field []string) (err error) {
 // BB[1,2] will provide the first entry of the period group and the second entry of the
 // multiple field.
 func (def *Definition) ShouldRestrictToFieldSlice(field []string) (err error) {
-	if Central.IsDebugLevel() {
+	debug := Central.IsDebugLevel()
+	if debug {
 		Central.Log.Debugf("Should restrict fields to %#v", field)
 		def.DumpTypes(true, false, "Start status before restrict")
 	}
@@ -516,10 +551,12 @@ func (def *Definition) ShouldRestrictToFieldSlice(field []string) (err error) {
 	}
 
 	if len(fieldMap.set) > 0 {
-		Central.Log.Debugf("Field map not empty, unknown fields found ... %v", fieldMap.set)
+		if debug {
+			Central.Log.Debugf("Field map not empty, unknown fields found ... %v", fieldMap.set)
+		}
 		for f := range fieldMap.set {
 			err = NewGenericError(50, f)
-			if Central.IsDebugLevel() {
+			if debug {
 				Central.Log.Debugf("Error restict fieldMap ... %v", err)
 				def.DumpTypes(true, false, "error restrict 50")
 			}
@@ -527,12 +564,14 @@ func (def *Definition) ShouldRestrictToFieldSlice(field []string) (err error) {
 		}
 	}
 
-	Central.Log.Debugf("Remove/Cleanup empty structures ...%#v", fieldMap.strCount)
+	if debug {
+		Central.Log.Debugf("Remove/Cleanup empty structures ...%#v", fieldMap.strCount)
+	}
 	for _, strType := range fieldMap.strCount {
 		removeFromTree(strType)
 	}
 	def.activeFieldTree = fieldMap.parentStructure
-	if Central.IsDebugLevel() {
+	if debug {
 		Central.Log.Debugf("Final restricted type tree .........")
 		def.DumpTypes(true, false, "Not active restricted")
 		def.DumpTypes(true, true, "final active restricted")
@@ -546,11 +585,12 @@ func removeFromTree(value *StructureType) {
 		Central.Log.Debugf("Field %s already removed", value.Name())
 		return
 	}
-	if Central.IsDebugLevel() {
+	debug := Central.IsDebugLevel()
+	if debug {
 		Central.Log.Debugf("Remove empty nodes from value: %s len=%d", value.Name(), value.NrFields())
 	}
 	if value.NrFields() == 0 {
-		if Central.IsDebugLevel() {
+		if debug {
 			Central.Log.Debugf("No sub fields, remove value %s value=%p count=%d", value.Name(), value, value.NrFields())
 			Central.Log.Debugf("Remove value: %s fields=%d", value.Name(), value.NrFields())
 		}
@@ -564,11 +604,11 @@ func removeFromTree(value *StructureType) {
 			}
 		}
 	} else {
-		if Central.IsDebugLevel() {
+		if debug {
 			Central.Log.Debugf("Value %s value=%p count=%d contains >0 entries:", value.Name(), value, value.NrFields())
-		}
-		for _, t := range value.SubTypes {
-			Central.Log.Debugf("Contains %s", t.Name())
+			for _, t := range value.SubTypes {
+				Central.Log.Debugf("Contains %s", t.Name())
+			}
 		}
 	}
 }

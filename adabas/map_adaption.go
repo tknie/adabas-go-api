@@ -39,21 +39,30 @@ func traverseAdaptType(adaType adatypes.IAdaType, parentType adatypes.IAdaType, 
 	mapAdapt := x.(*mapAdaption)
 	adabasMap := mapAdapt.adabasMap
 	sn := adaType.ShortName()[0:2]
-	adatypes.Central.Log.Debugf("Adapt type %s/%s", adaType.Name(), sn)
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
+		adatypes.Central.Log.Debugf("Adapt type %s/%s", adaType.Name(), sn)
+	}
 	f := adabasMap.fieldMap[sn]
 	if f == nil {
 		adaType.AddFlag(adatypes.FlagOptionToBeRemoved)
-		adatypes.Central.Log.Debugf("Field %s flag to be removed", adaType.Name())
+		if debug {
+			adatypes.Central.Log.Debugf("Field %s flag to be removed", adaType.Name())
+		}
 		return nil
 	}
-	adatypes.Central.Log.Debugf("Field map does contains %s -> %s/%s format type=>%s<", f.LongName, adaType.Name(), adaType.ShortName(), f.FormatType)
+	if debug {
+		adatypes.Central.Log.Debugf("Field map does contains %s -> %s/%s format type=>%s<", f.LongName, adaType.Name(), adaType.ShortName(), f.FormatType)
+	}
 	adaType.RemoveFlag(adatypes.FlagOptionToBeRemoved)
 	mapAdapt.definition.AdaptName(adaType, f.LongName)
 	adaType.SetName(f.LongName)
 
 	switch strings.Trim(f.FormatType, " ") {
 	case "#":
-		adatypes.Central.Log.Debugf("Replace %s on parent %s", adaType.ShortName(), parentType.ShortName())
+		if debug {
+			adatypes.Central.Log.Debugf("Replace %s on parent %s", adaType.ShortName(), parentType.ShortName())
+		}
 		nt := adatypes.NewRedefinitionType(adaType)
 		adaptRedefintionFields(nt, adabasMap.redefinitionFieldMap[adaType.ShortName()])
 		st := parentType.(*adatypes.StructureType)
@@ -69,18 +78,24 @@ func traverseAdaptType(adaType adatypes.IAdaType, parentType adatypes.IAdaType, 
 	adaType.SetFormatLength(uint32(f.Length))
 	if !adaType.IsStructure() {
 		if f.Length < 0 {
-			adatypes.Central.Log.Debugf("Set %s length to 0 formerly was %d or %d", adaType.Name(), adaType.Length(), f.Length)
+			if debug {
+				adatypes.Central.Log.Debugf("Set %s length to 0 formerly was %d or %d", adaType.Name(), adaType.Length(), f.Length)
+			}
 			adaType.SetLength(0)
 		} else {
-			adatypes.Central.Log.Debugf("Set %s length to %d, check content type=%s",
-				adaType.Name(), f.Length, f.ContentType)
+			if debug {
+				adatypes.Central.Log.Debugf("Set %s length to %d, check content type=%s",
+					adaType.Name(), f.Length, f.ContentType)
+			}
 			adaType.SetLength(uint32(f.Length))
 		}
 		ct := strings.Split(f.ContentType, ",")
 		for _, c := range ct {
 			p := strings.Split(c, "=")
 			if len(p) > 1 {
-				adatypes.Central.Log.Debugf("%s=%s", p[0], p[1])
+				if debug {
+					adatypes.Central.Log.Debugf("%s=%s", p[0], p[1])
+				}
 				s := strings.ToLower(p[0])
 				switch s {
 				case "fractionalshift":
@@ -93,7 +108,9 @@ func traverseAdaptType(adaType adatypes.IAdaType, parentType adatypes.IAdaType, 
 					}
 					adaType.SetFractional(uint32(fs))
 				case "charset":
-					adatypes.Central.Log.Debugf("Set charset to %s", p[1])
+					if debug {
+						adatypes.Central.Log.Debugf("Set charset to %s", p[1])
+					}
 					adaType.SetCharset(p[1])
 				case "formattype":
 					if p[1] != "" {
@@ -114,7 +131,9 @@ func traverseAdaptType(adaType adatypes.IAdaType, parentType adatypes.IAdaType, 
 			}
 		}
 	}
-	adatypes.Central.Log.Debugf("Set long name %s for %s/%s", f.LongName, adaType.Name(), adaType.ShortName())
+	if debug {
+		adatypes.Central.Log.Debugf("Set long name %s for %s/%s", f.LongName, adaType.Name(), adaType.ShortName())
+	}
 	return nil
 }
 
