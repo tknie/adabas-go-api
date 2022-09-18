@@ -183,31 +183,15 @@ func (request *ReadRequest) ReadLOBRecord(isn adatypes.Isn, field string, blocks
 		if debug {
 			adatypes.Central.Log.Debugf("Read next LOB segment with ...cursoring")
 		}
-		/*
-			request.definition.DumpTypes(false, false, "All")
-			request.definition.DumpTypes(false, true, "Active")
-			request.definition.DumpValues(true)
-			request.definition.DumpValues(false)*/
 		err = request.definition.CreateValues(false)
 		if err != nil {
 			return
 		}
-		/*
-			request.definition.DumpTypes(false, false, "All")
-			request.definition.DumpTypes(false, true, "Active")
-			request.definition.DumpValues(true)
-			request.definition.DumpValues(false)
-			fmt.Println("Search", field, request.definition.Fieldnames())
-		*/
 		fieldValue := request.definition.Search(field)
 		lob := fieldValue.(adatypes.ILob)
 		lob.SetLobBlockSize(blocksize)
 		lob.SetLobPartRead(true)
 		request.cursoring.adabasRequest.Option.PartialRead = true
-		/*
-			request.definition.DumpValues(true)
-			request.definition.DumpValues(false)
-		*/
 		result = &Response{Definition: request.definition, fields: request.fields}
 		if debug {
 			adatypes.Central.Log.Debugf("Call next LOB read %v/%d", request.cursoring.adabasRequest.Option.PartialRead, request.BlockSize)

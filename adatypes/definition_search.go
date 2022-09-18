@@ -197,7 +197,6 @@ func (def *Definition) SearchByIndex(fieldName string, index []uint32, create bo
 								strv := x.found.(*StructureValue)
 								element := strv.elementMap[index[1]]
 								if element == nil {
-									def.DumpValues(false)
 									err = NewGenericError(123)
 									return
 								}
