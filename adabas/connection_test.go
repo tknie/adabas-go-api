@@ -427,6 +427,40 @@ func TestConnectionMultifetch(t *testing.T) {
 	}
 }
 
+func TestConnectionSearchAndOrder(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping malloc count in short mode")
+	}
+	initTestLogWithFile(t, "connection.log")
+
+	adatypes.Central.Log.Infof("TEST: %s", t.Name())
+	connection, err := NewConnection("acj;target=" + adabasModDBIDs)
+	if !assert.NoError(t, err) {
+		return
+	}
+	if !assert.NotNil(t, connection) {
+		return
+	}
+	defer connection.Close()
+	fmt.Println(connection)
+	connection.Open()
+	readRequest, rErr := connection.CreateFileReadRequest(11)
+	assert.NoError(t, rErr)
+	readRequest.Limit = 0
+	readRequest.Multifetch = 10
+
+	qErr := readRequest.QueryFields("AA,AB,AQ")
+	assert.NoError(t, qErr)
+	fmt.Println("Result data:")
+	var result *Response
+	result, err = readRequest.SearchAndOrder("AE=[B:BAF)", "AE")
+	assert.NoError(t, err)
+	// result.DumpValues()
+	if assert.NotNil(t, result) {
+		validateResult(t, t.Name(), result)
+	}
+}
+
 func TestConnectionNoMultifetch(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping malloc count in short mode")
@@ -561,6 +595,7 @@ func TestConnectionPeriodAndMultipleQuantity(t *testing.T) {
 	if !assert.Equal(t, int32(2), result.Values[0].ValueQuantity("AW")) {
 		return
 	}
+	validateResult(t, t.Name(), result)
 	// result.DumpValues()
 }
 
@@ -611,6 +646,7 @@ func TestConnectionWithMap(t *testing.T) {
 			assert.Error(t, xErr, "Error should be send if value is string")
 			assert.Equal(t, int64(0), ei64)
 		}
+		validateResult(t, t.Name(), result)
 	}
 
 }
