@@ -72,7 +72,7 @@ func TestMapRepositoryRead(t *testing.T) {
 	// fmt.Printf("%#v", x)
 }
 
-func BenchmarkReadMap(b *testing.B) {
+func BenchmarkReadMapOld(b *testing.B) {
 	initLogWithFile("map_repositories_bench.log")
 
 	adatypes.Central.Log.Infof("TEST: %s", b.Name())
@@ -83,14 +83,7 @@ func BenchmarkReadMap(b *testing.B) {
 	if !assert.NoError(b, err) {
 		return
 	}
-	cleanup(b, baseMap)
-	for i := 0; i < maxMaps; i++ {
-		baseMap.Name = "Test" + strconv.Itoa(i)
-		err := baseMap.Store()
-		if !assert.NoError(b, err) {
-			return
-		}
-	}
+	createMaps(b, baseMap)
 	_, err = mr.LoadAllMaps(adabas)
 	if !assert.NoError(b, err) {
 		return
@@ -101,7 +94,7 @@ func BenchmarkReadMap(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		index := b.N % maxMaps
 		name := "Test" + strconv.Itoa(index)
-		m, err2 := mr.SearchMap(adabas2, name)
+		m, err2 := mr.readAdabasMap(adabas2, name)
 		if !assert.NoError(b, err2) {
 			return
 		}
@@ -109,9 +102,68 @@ func BenchmarkReadMap(b *testing.B) {
 	}
 	defer cleanup(b, baseMap)
 }
+
+func createMaps(b *testing.B, baseMap *Map) {
+	cleanup(b, baseMap)
+	for i := 0; i < maxMaps; i++ {
+		baseMap.Name = "Test" + strconv.Itoa(i)
+		err := baseMap.Store()
+		if !assert.NoError(b, err) {
+			return
+		}
+	}
+}
+
 func cleanup(b *testing.B, baseMap *Map) {
 	for i := 0; i < maxMaps; i++ {
 		baseMap.Name = "Test" + strconv.Itoa(i)
 		baseMap.Delete()
 	}
+}
+
+func readMap(t *testing.B, read *ReadRequest, name string) *Map {
+	result, rErr := read.ReadLogicalWith("RN=" + name)
+	if !assert.NoError(t, rErr) {
+		return nil
+	}
+	return result.Data[0].(*Map)
+
+}
+
+func BenchmarkReadMapNew(b *testing.B) {
+	initLogWithFile("map_repositories_bench.log")
+
+	adatypes.Central.Log.Infof("TEST: %s", b.Name())
+
+	connection, cerr := NewConnection("acj;inmap=23,4")
+	if !assert.NoError(b, cerr) {
+		return
+	}
+	defer connection.Close()
+
+	read, err := connection.CreateMapReadRequest(&Map{TypeID: 77})
+	if !assert.NoError(b, err) {
+		return
+	}
+	baseMap := readMap(b, read, "EMPLOYEES-NAT-DDM")
+	if !assert.NotNil(b, baseMap) {
+		return
+	}
+
+	createMaps(b, baseMap)
+
+	mr := NewMapRepository(connection.adabasToData, 4)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		index := b.N % maxMaps
+		name := "Test" + strconv.Itoa(index)
+		m := readMap(b, read, name)
+		if !assert.NotNil(b, m) {
+			return
+		}
+		assert.Equal(b, name, m.Name)
+		mr.AddMapToCache(name, m)
+	}
+	defer cleanup(b, baseMap)
 }
