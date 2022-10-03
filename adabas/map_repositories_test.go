@@ -22,6 +22,7 @@ package adabas
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -154,6 +155,9 @@ func BenchmarkReadMapNew(b *testing.B) {
 	baseMap := readMap(b, read, "EMPLOYEES-NAT-DDM")
 	if !assert.NotNil(b, baseMap) {
 		return
+	}
+	if strings.Trim(baseMap.DataURL, " ") == "" {
+		baseMap.DataURL = "23"
 	}
 	url, err := NewURL(baseMap.DataURL)
 	if !assert.NoError(b, err) {
