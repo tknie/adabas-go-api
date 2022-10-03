@@ -91,6 +91,10 @@ func BenchmarkReadMap(b *testing.B) {
 			return
 		}
 	}
+	_, err = mr.LoadAllMaps(adabas)
+	if !assert.NoError(b, err) {
+		return
+	}
 	b.ResetTimer()
 	adabas2, _ := NewAdabas(23)
 	defer adabas2.Close()
