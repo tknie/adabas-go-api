@@ -126,6 +126,12 @@ func readMap(t *testing.B, read *ReadRequest, name string) *Map {
 	if !assert.NoError(t, rErr) {
 		return nil
 	}
+	if !assert.True(t, len(result.Data) == 1, name) {
+		return nil
+	}
+	if !assert.NotNil(t, result.Data[0], name) {
+		return nil
+	}
 	return result.Data[0].(*Map)
 
 }
@@ -149,10 +155,16 @@ func BenchmarkReadMapNew(b *testing.B) {
 	if !assert.NotNil(b, baseMap) {
 		return
 	}
-
-	createMaps(b, baseMap)
+	url, err := NewURL(baseMap.DataURL)
+	if !assert.NoError(b, err) {
+		return
+	}
+	baseMap.Data = &DatabaseURL{*url, Fnr(baseMap.File)}
 
 	mr := NewMapRepository(connection.adabasToData, 4)
+	baseMap.Repository = &mr.DatabaseURL
+
+	createMaps(b, baseMap)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
