@@ -52,6 +52,8 @@ func setAdabasID(id *ID) error {
 
 // CallAdabas uses the Adabas Windows API Call to call
 func callAdabas(acbx *Acbx, abd []*Buffer) error {
+	defer TimeTrack(time.Now(), "Call adabas(Windows)", adabas)
+	defer TrackAdabas(time.Now(), adabas)
 	for _, ab := range abd {
 		if len(ab.buffer) > 0 {
 			ab.abd.Abdaddr = uint64(uintptr(unsafe.Pointer(&ab.buffer[0])))

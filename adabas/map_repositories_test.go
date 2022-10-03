@@ -21,11 +21,14 @@ package adabas
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tknie/adabas-go-api/adatypes"
 )
+
+const maxMaps = 20
 
 func TestMapRepositoryReadAll(t *testing.T) {
 	initTestLogWithFile(t, "map_repositories.log")
@@ -67,4 +70,44 @@ func TestMapRepositoryRead(t *testing.T) {
 	x := employeeMap.fieldMap["AA"]
 	assert.NotNil(t, x)
 	// fmt.Printf("%#v", x)
+}
+
+func BenchmarkReadMap(b *testing.B) {
+	initLogWithFile("map_repositories_bench.log")
+
+	adatypes.Central.Log.Infof("TEST: %s", b.Name())
+	adabas, _ := NewAdabas(23)
+	defer adabas.Close()
+	mr := NewMapRepository(adabas, 4)
+	baseMap, err := mr.SearchMap(adabas, "EMPLOYEES-NAT-DDM")
+	if !assert.NoError(b, err) {
+		return
+	}
+	cleanup(b, baseMap)
+	for i := 0; i < maxMaps; i++ {
+		baseMap.Name = "Test" + strconv.Itoa(i)
+		err := baseMap.Store()
+		if !assert.NoError(b, err) {
+			return
+		}
+	}
+	b.ResetTimer()
+	adabas2, _ := NewAdabas(23)
+	defer adabas2.Close()
+	for i := 0; i < b.N; i++ {
+		index := b.N % maxMaps
+		name := "Test" + strconv.Itoa(index)
+		m, err2 := mr.SearchMap(adabas2, name)
+		if !assert.NoError(b, err2) {
+			return
+		}
+		assert.Equal(b, name, m.Name)
+	}
+	defer cleanup(b, baseMap)
+}
+func cleanup(b *testing.B, baseMap *Map) {
+	for i := 0; i < maxMaps; i++ {
+		baseMap.Name = "Test" + strconv.Itoa(i)
+		baseMap.Delete()
+	}
 }

@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/tknie/adabas-go-api/adatypes"
 
@@ -96,8 +97,16 @@ func TestMapFields(t *testing.T) {
 	testDefinition.DumpTypes(false, true)
 }
 
+func trackAdabas(start time.Time, adabas *Adabas) {
+	fmt.Println("Tracker: " + string(adabas.Acbx.Acbxcmd[0]) + string(adabas.Acbx.Acbxcmd[1]))
+}
+
 func TestMaps(t *testing.T) {
 	initTestLogWithFile(t, "map.log")
+
+	tracker := &Tracker{trackAdabas}
+	RegisterTracker(tracker)
+	defer ClearTracker()
 
 	adatypes.Central.Log.Infof("TEST: %s", t.Name())
 	adabas, _ := NewAdabas(adabasModDBID)

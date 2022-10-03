@@ -294,10 +294,6 @@ func (repository *Repository) LoadAllMaps(adabas *Adabas) (adabasMaps []*Map, er
 		}
 	}
 	if adabas == nil {
-		// adabas, err = NewAdabass(repository.URL.String())
-		// if err != nil {
-		// 	return
-		// }
 		return nil, adatypes.NewGenericError(64)
 	}
 	adatypes.Central.Log.Debugf("Load all maps")
