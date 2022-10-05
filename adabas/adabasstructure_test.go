@@ -50,11 +50,13 @@ func TestAIDGeneral(t *testing.T) {
 	aid.isOpen("abc")
 	aid.AdaID.Timestamp = 1664960284084192
 	aid.SetID(3326887813)
+	aid.SetHost("linuxhost")
+	aid.SetUser("administrator")
 	fmt.Println(aid.String())
-	assert.Equal(t, "64a1ce624098f76014046b8bc7fd2910", aid.MD5())
+	assert.Equal(t, "40b38c69e6344b1e39b0397884fee4d0", aid.MD5())
 	aid.SetID(1926887813)
 	fmt.Println(aid.String())
-	assert.Equal(t, "49e5287dac8cd9603afffb633d7daced", aid.MD5())
+	assert.Equal(t, "55319d46fc050ec6262b6d438d5b62cc", aid.MD5())
 }
 
 func TestAIDClone(t *testing.T) {
