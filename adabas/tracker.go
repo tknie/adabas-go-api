@@ -4,7 +4,7 @@ import "time"
 
 // Tracker tracker function containing the function to call
 type Tracker struct {
-	TrackFunc func(start time.Time, adabas *Adabas)
+	TrackFunc func(start time.Duration, adabas *Adabas)
 }
 
 var adabasTracker *Tracker
@@ -21,7 +21,8 @@ func ClearTracker() {
 
 // TrackAdabas track Adabas calls (internally)
 func TrackAdabas(start time.Time, adabas *Adabas) {
+	elapsed := time.Since(start)
 	if adabasTracker != nil {
-		adabasTracker.TrackFunc(start, adabas)
+		adabasTracker.TrackFunc(elapsed, adabas)
 	}
 }

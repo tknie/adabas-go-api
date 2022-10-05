@@ -829,3 +829,43 @@ func TestAdabasOpenUser(t *testing.T) {
 
 	// time.Sleep(time.Minute * 1)
 }
+
+var trackRsp = uint16(0)
+
+func trackAdabasReturnCode(start time.Duration, adabas *Adabas) {
+	fmt.Println("Tracker:", string(adabas.Acbx.Acbxcmd[0])+string(adabas.Acbx.Acbxcmd[1]), adabas.Acbx.Acbxrsp)
+	trackRsp = adabas.Acbx.Acbxrsp
+}
+
+func TestAdabasTrack(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping malloc count in short mode")
+	}
+	initTestLogWithFile(t, "adabas.log")
+
+	tracker := &Tracker{trackAdabasReturnCode}
+	RegisterTracker(tracker)
+	defer ClearTracker()
+
+	adatypes.Central.Log.Infof("TEST: %s", t.Name())
+
+	adabas, err := NewAdabas(209)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	err = adabas.OpenUser("ABC")
+	assert.Error(t, err)
+	assert.Equal(t, uint16(148), trackRsp)
+	adabas.SetDbid(adabasModDBID)
+	defer adabas.Close()
+	err = adabas.OpenUser("ABCDEFGHIJK")
+	assert.NoError(t, err)
+	assert.Equal(t, uint16(0), trackRsp)
+	assert.Equal(t, "ABCDEFGH", string(adabas.Acbx.Acbxadd1[:]))
+	assert.NotEmpty(t, adabas.Version())
+	assert.NotEmpty(t, adabas.Platform())
+	fmt.Printf("Call Adabas to Adabas version %s on %s\n", adabas.Version(), adabas.Platform())
+
+	// time.Sleep(time.Minute * 1)
+}

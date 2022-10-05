@@ -97,7 +97,7 @@ func TestMapFields(t *testing.T) {
 	testDefinition.DumpTypes(false, true)
 }
 
-func trackAdabas(start time.Time, adabas *Adabas) {
+func trackAdabas(start time.Duration, adabas *Adabas) {
 	fmt.Println("Tracker: " + string(adabas.Acbx.Acbxcmd[0]) + string(adabas.Acbx.Acbxcmd[1]))
 }
 

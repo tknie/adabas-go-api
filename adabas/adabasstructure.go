@@ -21,6 +21,8 @@ package adabas
 
 import (
 	"bytes"
+	"crypto/md5"
+	"encoding/binary"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -177,6 +179,7 @@ type ID struct {
 	AdaID         *AID
 	user          string
 	pwd           string
+	md5           string
 }
 
 // Clone use base parameter of ID and create new one
@@ -194,6 +197,19 @@ func (adaid *ID) Clone() *ID {
 	return &aid
 }
 
+func (adaid *ID) MD5() string {
+	if adaid.md5 == "" {
+		var buffer bytes.Buffer
+		err := binary.Write(&buffer, Endian(), adaid.AdaID)
+		if err != nil {
+			return "ERR: index"
+		}
+		hashsum := md5.Sum(buffer.Bytes())
+		adaid.md5 = fmt.Sprintf("%x", hashsum[:])
+	}
+	return adaid.md5
+}
+
 // SetUser set the user id name into the ID, prepare byte array correctly
 func (adaid *ID) SetUser(User string) {
 	for i := 0; i < 8; i++ {
@@ -201,6 +217,7 @@ func (adaid *ID) SetUser(User string) {
 	}
 
 	copy(adaid.AdaID.User[:], User)
+	adaid.md5 = ""
 }
 
 // SetHost set the host id name into the ID, prepare byte array correctly
@@ -210,11 +227,13 @@ func (adaid *ID) SetHost(Host string) {
 	}
 
 	copy(adaid.AdaID.Node[:], Host)
+	adaid.md5 = ""
 }
 
 // SetID set the pid into the ID, prepare byte array correctly
 func (adaid *ID) SetID(pid uint32) {
 	adaid.AdaID.Pid = pid
+	adaid.md5 = ""
 }
 
 // AddCredential add user id and password credentials
