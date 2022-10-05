@@ -197,6 +197,7 @@ func (adaid *ID) Clone() *ID {
 	return &aid
 }
 
+// MD5 generates a MD5 hash sum of the Adabas ID
 func (adaid *ID) MD5() string {
 	if adaid.md5 == "" {
 		var buffer bytes.Buffer
