@@ -145,7 +145,7 @@ func (repository *Repository) SearchMapInRepository(adabas *Adabas, mapName stri
 	}
 	adatypes.Central.Log.Debugf("Database id %d got map repository dbid %d", adabas.Acbx.Acbxdbid, dbid)
 	if adabas.Acbx.Acbxdbid == 0 && adabas.Acbx.Acbxdbid != dbid {
-		adabas.Close()
+		// adabas.Close()
 		adabas.Acbx.Acbxdbid = dbid
 		adatypes.Central.Log.Debugf("Set new dbid after map %s to %d", mapName, dbid)
 		adatypes.Central.Log.Debugf("Call search in repository using Adabas %s/%03d", adabas.URL.String(), adabas.Acbx.Acbxfnr)
@@ -247,11 +247,11 @@ func (repository *Repository) SearchMap(adabas *Adabas, mapName string) (adabasM
 	}
 
 	adatypes.Central.Log.Debugf("Not found in cache read map: %s", mapName)
-	isOpen := adabas.ID.isOpen(adabas.URL.String())
+	//isOpen := adabas.ID.isOpen(adabas.URL.String())
 	request, _ := NewReadRequest(adabas, repository.Fnr)
-	if !isOpen {
-		defer request.Close()
-	}
+	// if !isOpen {
+	// 	defer request.Close()
+	// }
 	request.Limit = 0
 	err = request.ReadLogicalWithWithParser(mapFieldName.fieldName()+"="+mapName, parseMaps, repository)
 	if err != nil {

@@ -318,6 +318,10 @@ func TestReadLogicalLOBWithCursoring(t *testing.T) {
 	}
 	initTestLogWithFile(t, "connection_cursoring.log")
 
+	tracker := &Tracker{trackAdabas}
+	RegisterTracker(tracker)
+	defer ClearTracker()
+
 	connection, cerr := NewConnection("acj;target=" + adabasStatDBIDs)
 	if !assert.NoError(t, cerr) {
 		fmt.Println("Error creating new connection", cerr)

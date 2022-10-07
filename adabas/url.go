@@ -264,3 +264,13 @@ func (URL *URL) GetOption(option string) string {
 	}
 	return ""
 }
+
+func (URL *URL) Compare(nu *URL) bool {
+	if URL == nu {
+		return true
+	}
+	if URL.String() == nu.String() {
+		return true
+	}
+	return false
+}

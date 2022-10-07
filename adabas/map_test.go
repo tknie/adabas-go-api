@@ -98,7 +98,10 @@ func TestMapFields(t *testing.T) {
 }
 
 func trackAdabas(start time.Duration, adabas *Adabas) {
-	fmt.Println("Tracker: " + string(adabas.Acbx.Acbxcmd[0]) + string(adabas.Acbx.Acbxcmd[1]))
+	fmt.Println("Adabas CMD:", string(adabas.Acbx.Acbxcmd[0])+string(adabas.Acbx.Acbxcmd[1]),
+		"DB:", adabas.Acbx.Acbxdbid, "/", adabas.Acbx.Acbxfnr,
+		"ERR:", adabas.Acbx.Acbxrsp,
+		"USER:", string(adabas.ID.AdaID.User[0:8]), adabas.ID.MD5())
 }
 
 func TestMaps(t *testing.T) {

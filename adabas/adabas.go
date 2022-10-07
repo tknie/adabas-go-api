@@ -1098,9 +1098,10 @@ func (adabas *Adabas) Update(fileNr Fnr, adabasRequest *adatypes.Request) (err e
 
 // SetURL set new database URL
 func (adabas *Adabas) SetURL(URL *URL) {
-	if adabas.URL == URL {
+	if adabas.URL.Compare(URL) {
 		return
 	}
+	adatypes.Central.Log.Debugf("Set new URL in adabas old=%s new=%s", adabas.URL.String(), URL.String())
 	adabas.Close()
 	adabas.Acbx.Acbxdbid = URL.Dbid
 	adabas.URL = URL

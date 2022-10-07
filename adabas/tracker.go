@@ -1,6 +1,10 @@
 package adabas
 
-import "time"
+import (
+	"time"
+
+	"github.com/tknie/adabas-go-api/adatypes"
+)
 
 // Tracker tracker function containing the function to call
 type Tracker struct {
@@ -23,6 +27,9 @@ func ClearTracker() {
 func TrackAdabas(start time.Time, adabas *Adabas) {
 	elapsed := time.Since(start)
 	if adabasTracker != nil {
+		if adatypes.Central.IsDebugLevel() {
+			adatypes.Central.Log.Debugf("Tracking call")
+		}
 		adabasTracker.TrackFunc(elapsed, adabas)
 	}
 }
