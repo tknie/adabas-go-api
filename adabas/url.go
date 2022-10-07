@@ -265,6 +265,7 @@ func (URL *URL) GetOption(option string) string {
 	return ""
 }
 
+// Compare compares equality of two URL
 func (URL *URL) Compare(nu *URL) bool {
 	if URL == nu {
 		return true
