@@ -36,14 +36,17 @@ var (
 	mapHash            map[string]*Repository
 	mapHashLock        sync.Mutex
 	mapLoopRunning     bool
-	mapMaxMinutesCache = 10
+	mapMaxMinutesCache = 120
 )
 
 func init() {
 	mapHash = make(map[string]*Repository)
 	mapCacheLoop := os.Getenv("MAP_CACHE_LOOP")
 	if mapCacheLoop != "" {
-		StartAsynchronousMapCache(10)
+		x, err := strconv.Atoi(mapCacheLoop)
+		if err == nil && x > 9 {
+			StartAsynchronousMapCache(x)
+		}
 	}
 }
 
