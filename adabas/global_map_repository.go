@@ -67,7 +67,6 @@ func EndAsynchronousMapCache() {
 // loopMapCache Adabas Map cache loop thread
 func loopMapCache(interval int) {
 	adatypes.Central.Log.Debugf("Init loop map cache check")
-	mapLoopRunning = true
 	defer EndAsynchronousMapCache()
 	for mapLoopRunning {
 		adatypes.Central.Log.Debugf("Start loop map cache check")
@@ -79,11 +78,13 @@ func loopMapCache(interval int) {
 		_, err = readAllGlobalMapNames(ada)
 		if err != nil {
 			adatypes.Central.Log.Debugf("Some map cache name error %v", err)
+			return
 		}
 		adatypes.Central.Log.Debugf("Number of Hashed maps: %d", len(mapHash))
 		ada.Close()
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
+	mapLoopRunning = true
 }
 
 // AddGlobalMapRepositoryReference this method adds a Adabas Map
