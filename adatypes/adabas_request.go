@@ -411,7 +411,9 @@ func generateFormatBufferField(adabasRequest *Request, adaType IAdaType) {
 			}
 		}
 	} else {
-		Central.Log.Infof("Unknown FB generator: %v", adaType.Name())
+		if Central.IsDebugLevel() {
+			Central.Log.Debugf("Unknown FB generator: %v", adaType.Name())
+		}
 	}
 
 }
