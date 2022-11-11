@@ -2089,3 +2089,22 @@ func TestConnectionMUsystemField(t *testing.T) {
 	}
 
 }
+
+func TestConnectionAdabasMaps(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping malloc count in short mode")
+	}
+	initTestLogWithFile(t, "connection_map.log")
+
+	adatypes.Central.Log.Infof("TEST: %s", t.Name())
+	connection, cerr := NewConnection("acj;map;config=[" + adabasModDBIDs + ",250];auth=NONE,user=TCMapPoin,id=4,host=REMOTE")
+	if !assert.NoError(t, cerr) {
+		return
+	}
+	defer connection.Close()
+	fmt.Println("Connection : ", connection)
+	maps, err := connection.GetMaps()
+	if assert.NoError(t, err) {
+		assert.Len(t, maps, 10)
+	}
+}
