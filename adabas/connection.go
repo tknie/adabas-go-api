@@ -25,6 +25,7 @@ import (
 	"math"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -773,5 +774,6 @@ func (connection *Connection) GetMaps() ([]string, error) {
 	for m := range connection.repository.mapNames {
 		maps = append(maps, m)
 	}
+	sort.Strings(maps)
 	return maps, nil
 }

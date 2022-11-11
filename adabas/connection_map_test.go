@@ -2105,6 +2105,6 @@ func TestConnectionAdabasMaps(t *testing.T) {
 	fmt.Println("Connection : ", connection)
 	maps, err := connection.GetMaps()
 	if assert.NoError(t, err) {
-		assert.Len(t, maps, 10)
+		assert.Len(t, maps, 17)
 	}
 }
