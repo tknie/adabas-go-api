@@ -306,6 +306,47 @@ func TestConnectionMap(t *testing.T) {
 	}
 }
 
+func TestConnectionMapNoFields(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping malloc count in short mode")
+	}
+	err := initLogWithFile("connection_map.log")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	adatypes.Central.Log.Infof("TEST: %s", t.Name())
+
+	connection, cerr := NewConnection("acj;map=EMPLOYEES-NAT-DDM;config=[" + adabasStatDBIDs + ",4];auth=NONE,user=XMAP")
+	if !assert.NoError(t, cerr) {
+		return
+	}
+	defer connection.Close()
+
+	request, rerr := connection.CreateReadRequest()
+	if !assert.NoError(t, rerr) {
+		fmt.Println("Error create request", rerr)
+		return
+	}
+	err = request.QueryFields("")
+	if !assert.NoError(t, err) {
+		return
+	}
+	request.Limit = 10
+	var result *Response
+	result, err = request.ReadLogicalWith("NAME='SMITH'")
+	if !assert.NoError(t, err) {
+		return
+	}
+	if !assert.Equal(t, 10, len(result.Values)) {
+		return
+	}
+	for _, v := range result.Values {
+		assert.True(t, v.Isn > 0)
+	}
+
+}
+
 func BenchmarkConnection_noreconnectremote(b *testing.B) {
 	err := initLogWithFile("connection_map.log")
 	if err != nil {

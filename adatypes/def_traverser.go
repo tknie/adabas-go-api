@@ -87,6 +87,9 @@ func (def *Definition) TraverseValues(t TraverserValuesMethods, x interface{}) (
 		if err != nil {
 			return EndTraverser, err
 		}
+		if def.Values == nil {
+			def.Values = make([]IAdaValue, 0)
+		}
 		Central.Log.Debugf("Done create values")
 	}
 	Central.Log.Debugf("Traverse through level 1 values -> %d", len(def.Values))
