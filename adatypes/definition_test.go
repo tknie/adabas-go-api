@@ -596,6 +596,7 @@ func ExampleDefinition_dumpValues() {
 		return
 	}
 	testDefinition := createPeriodGroupMultiplerField()
+	testDefinition.CreateValues(false)
 	testDefinition.DumpTypes(false, false)
 	testDefinition.DumpValues(false)
 	// Output: Dump all file field types:
@@ -961,6 +962,7 @@ func ExampleDefinition_dumpValuesAll() {
 	}
 
 	testDefinition := createLayout()
+	testDefinition.CreateValues(false)
 
 	testDefinition.DumpTypes(false, true)
 	testDefinition.DumpValues(false)
@@ -1006,6 +1008,7 @@ func ExampleDefinition_dumpValuesRestrict() {
 		fmt.Println("Error restrict fields ", err)
 		return
 	}
+	testDefinition.CreateValues(false)
 	testDefinition.DumpTypes(false, true)
 	testDefinition.DumpValues(false)
 
