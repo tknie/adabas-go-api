@@ -86,6 +86,9 @@ type Adabas struct {
 	AdabasBuffers []*Buffer
 	transactions  *transactions
 	statistics    *Statistics
+	modifyFiles   []uint32
+	openRB        string
+	ReadOnly      bool
 	lock          *sync.Mutex
 }
 
@@ -159,10 +162,37 @@ func NewAdabas(p ...interface{}) (ada *Adabas, err error) {
 		transactions: &transactions{},
 		statistics:   newStatistics(),
 		lock:         &sync.Mutex{},
+		ReadOnly:     false,
 	}
 	adaID.setAdabas(ada)
 	return ada, nil
 
+}
+
+// openRecordBuffer record buffer used in OP command
+func (adabas *Adabas) openRecordBuffer() string {
+	switch {
+	case adabas.openRB != "":
+		return adabas.openRB
+	case adabas.ReadOnly:
+		return "ACC."
+	case len(adabas.modifyFiles) == 0:
+		// return "."
+	case len(adabas.modifyFiles) == 1:
+		return "UPD=" + strconv.Itoa(int(adabas.modifyFiles[0])) + "."
+	default:
+	}
+	return "UPD."
+}
+
+// SetModFiles set list of files to be modified
+func (adabas *Adabas) SetModFiles(modFiles []uint32) {
+	adabas.modifyFiles = modFiles
+}
+
+// SetOpenRB set predefined Record Buffer during OP (needed for special calls)
+func (adabas *Adabas) SetOpenRB(openRB string) {
+	adabas.openRB = openRB
 }
 
 func newStatistics() *Statistics {
@@ -243,7 +273,7 @@ func (adabas *Adabas) OpenUser(user string) (err error) {
 	// Create default buffers to open with able to update records in all files
 	adabas.AdabasBuffers = nil
 	adabas.AdabasBuffers = append(adabas.AdabasBuffers, NewBufferWithSize(AbdAQFb, 1))
-	adabas.AdabasBuffers = append(adabas.AdabasBuffers, NewSendBuffer(AbdAQRb, []byte("UPD.")))
+	adabas.AdabasBuffers = append(adabas.AdabasBuffers, NewSendBuffer(AbdAQRb, []byte(adabas.openRecordBuffer())))
 
 	err = adabas.CallAdabas()
 	if err != nil {

@@ -797,7 +797,10 @@ func (searchInfo *SearchInfo) expandConstants(searchValue *SearchValue, value st
 		Central.Log.Debugf("Rest value=%s", value[postIndicator:])
 	}
 	if expandedValue != "" {
-		appendNumericValue(&buffer, expandedValue)
+		err = appendNumericValue(&buffer, expandedValue)
+		if err != nil {
+			return err
+		}
 		numPart = true
 	}
 	if numPart {
@@ -816,7 +819,7 @@ func (searchInfo *SearchInfo) expandConstants(searchValue *SearchValue, value st
 	return
 }
 
-func appendNumericValue(buffer *bytes.Buffer, v string) {
+func appendNumericValue(buffer *bytes.Buffer, v string) error {
 	Central.Log.Debugf("Append numeric offset=%d v=%s\n", buffer.Len(), v)
 	if v != "" {
 		// Work on hexadecimal value
@@ -830,7 +833,7 @@ func appendNumericValue(buffer *bytes.Buffer, v string) {
 				multiplier, err = strconv.Atoi(v[bm+1 : em])
 				if err != nil {
 					Central.Log.Debugf("Error multiplier %v", err)
-					return
+					return err
 				}
 			} else {
 				bm = len(v)
@@ -841,7 +844,8 @@ func appendNumericValue(buffer *bytes.Buffer, v string) {
 			dst := make([]byte, hex.DecodedLen(len(src)))
 			n, err := hex.Decode(dst, src)
 			if err != nil {
-				Central.Log.Fatal(err)
+				Central.Log.Debugf("Numeric decode error: %v", err)
+				return err
 			}
 
 			Central.Log.Debugf("Byte value %v\n", dst[:n])
@@ -851,12 +855,12 @@ func appendNumericValue(buffer *bytes.Buffer, v string) {
 		} else {
 			va, err := strconv.ParseInt(v, 10, 0)
 			if err != nil {
-				Central.Log.Fatal(err)
+				Central.Log.Debugf("Value parse error %v\n", err)
+				return err
 			}
 			if va > math.MaxUint32 {
-				Central.Log.Fatal("value is greate then maximum")
-				// TODO add error return
-				return
+				Central.Log.Debugf("Value %d is greater then maximum\n", va)
+				return fmt.Errorf("value is greater then maximum %d>%d", va, math.MaxUint32)
 			}
 			if va > 0 {
 				bs := make([]byte, 4)
@@ -875,6 +879,7 @@ func appendNumericValue(buffer *bytes.Buffer, v string) {
 			}
 		}
 	}
+	return nil
 }
 
 // func (searchInfo *SearchInfo) extractBinarySearchNodeValue(value string, searchTreeNode *SearchValue) int {
