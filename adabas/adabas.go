@@ -241,8 +241,9 @@ func (adabas *Adabas) Open() (err error) {
 
 // OpenUser opens a session to the database using a user session.
 // A USERID must be provided if the user intends to store and/or read user data, and the user wants this data to be available during a subsequent user– or Adabas session.
-//    The user intends to store and/or read user data, and the user wants this data to be available during a subsequent user- or Adabas session;
-//    The user is to be assigned a special processing priority;
+//
+//	The user intends to store and/or read user data, and the user wants this data to be available during a subsequent user- or Adabas session;
+//	The user is to be assigned a special processing priority;
 //
 // The value provided for the USERID must be unique for this user (not used by any other user), and must begin with a digit or an uppercase letter.
 //
@@ -1127,9 +1128,10 @@ func (adabas *Adabas) Update(fileNr Fnr, adabasRequest *adatypes.Request) (err e
 
 // SetURL set new database URL
 func (adabas *Adabas) SetURL(URL *URL) {
-	if adabas.URL == URL {
+	if adabas.URL.Compare(URL) {
 		return
 	}
+	adatypes.Central.Log.Debugf("Set new URL in adabas old=%s new=%s", adabas.URL.String(), URL.String())
 	adabas.Close()
 	adabas.Acbx.Acbxdbid = URL.Dbid
 	adabas.URL = URL
@@ -1432,7 +1434,8 @@ func (adabas *Adabas) multifetchBuffer() (helper *adatypes.BufferHelper, err err
 }
 
 // TimeTrack defer function measure the difference end log it to log management, like
-//    defer TimeTrack(time.Now(), "CallAdabas "+string(adabas.Acbx.Acbxcmd[:]))
+//
+//	defer TimeTrack(time.Now(), "CallAdabas "+string(adabas.Acbx.Acbxcmd[:]))
 func TimeTrack(start time.Time, name string, adabas *Adabas) {
 	elapsed := time.Since(start)
 	if adabas == nil {

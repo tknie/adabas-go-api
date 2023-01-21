@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/tknie/adabas-go-api/adatypes"
 )
@@ -87,34 +88,41 @@ func (cc mapField) fieldName() string {
 // In advance the DDM specific type formater like B for Boolean or
 // N for NATDATE are available
 type MapField struct {
-	ShortName   string `json:"ShortName"`
-	LongName    string `json:"LongName"`
-	Length      int32  `json:"FormatLength"`
-	ContentType string `json:"ContentType"`
-	FormatType  string `json:"FormatType"`
-	FieldType   string `json:"FieldType"`
-	Charset     string `json:"Charset"`
-	File        uint32 `json:"File"`
-	Remarks     string
+	ShortName   string `json:"ShortName" adabas:"::MB"`
+	LongName    string `json:"LongName" adabas:"::MD"`
+	Length      int32  `json:"FormatLength" adabas:"::ML"`
+	ContentType string `json:"ContentType" adabas:"::MT"`
+	FormatType  string `json:"FormatType" adabas:"::MY"`
+	FieldType   string `json:"FieldType" adabas:"::MY"`
+	Charset     string `json:"Charset" adabas:":ignore"`
+	File        uint32 `json:"File" adabas:":ignore"`
+	Remarks     string `adabas:"::MR"`
 }
 
 // Map Adabas map structure defining repository where the Map is stored at
 type Map struct {
-	Name               string       `json:"Name"`
-	Version            string       `json:"Version"`
-	Isn                adatypes.Isn `json:"Isn"`
-	Repository         *DatabaseURL
-	Data               *DatabaseURL `json:"Data"`
-	Fields             []*MapField  `json:"Fields"`
-	RedefinitionFields []*MapField  `json:"RedefinitionFields"`
+	TypeID             byte         `adabas:"::TA"`
+	Host               string       `adabas:"::AB"`
+	Date               time.Time    `json:"Date" adabas:"::AC"`
+	Version            string       `json:"Version" adabas:"::AD"`
+	Isn                adatypes.Isn `json:"Isn" adabas:":isn"`
+	Name               string       `json:"Name" adabas:"::RN"`
+	Repository         *DatabaseURL `adabas:":ignore"`
+	DataURL            string       `adabas:"::RD"`
+	File               int          `adabas:"::RF"`
+	Data               *DatabaseURL `json:"Data" adabas:":ignore"`
+	RefURL             string       `adabas:"::DD"`
+	RefFile            int          `adabas:"::DF"`
+	Fields             []*MapField  `json:"Fields" adabas:"::MA"`
+	RedefinitionFields []*MapField  `json:"RedefinitionFields" adabas:":ignore"`
 	// Time of last modification of the map
-	Generated            uint64
-	ModificationTime     []uint64
-	DefaultCharset       string
-	fieldMap             map[string]*MapField
-	redefinitionFieldMap map[string][]*MapField
-	dynamic              *adatypes.DynamicInterface
-	lock                 *sync.Mutex
+	Generated            uint64                     `adabas:"::ZB"`
+	ModificationTime     []uint64                   `adabas:":ignore"`
+	DefaultCharset       string                     `adabas:":ignore"`
+	fieldMap             map[string]*MapField       `adabas:":ignore"`
+	redefinitionFieldMap map[string][]*MapField     `adabas:":ignore"`
+	dynamic              *adatypes.DynamicInterface `adabas:":ignore"`
+	lock                 *sync.Mutex                `adabas:":ignore"`
 }
 
 // NewAdabasMap create new Adabas map instance containing the long name
@@ -128,18 +136,18 @@ func NewAdabasMap(param ...interface{}) *Map {
 	case string:
 		name := param[0].(string)
 		if len(param) == 1 {
-			return &Map{Name: name, redefinitionFieldMap: redefinitionFieldMap,
+			return &Map{TypeID: 77, Name: name, redefinitionFieldMap: redefinitionFieldMap,
 				RedefinitionFields: redefinitionFields, lock: &sync.Mutex{}}
 		}
 		repository := param[1].(*DatabaseURL)
-		return &Map{Name: name, Repository: repository, DefaultCharset: "US-ASCII",
+		return &Map{TypeID: 77, Name: name, Repository: repository, DefaultCharset: "US-ASCII",
 			redefinitionFieldMap: redefinitionFieldMap,
 			RedefinitionFields:   redefinitionFields, lock: &sync.Mutex{}}
 	case *DatabaseURL:
 		repository := param[0].(*DatabaseURL)
 		dataRepository := param[1].(*DatabaseURL)
 		redefinitionFieldMap := make(map[string][]*MapField)
-		return &Map{Repository: repository, Data: dataRepository, DefaultCharset: "US-ASCII",
+		return &Map{TypeID: 77, Repository: repository, Data: dataRepository, DefaultCharset: "US-ASCII",
 			redefinitionFieldMap: redefinitionFieldMap,
 			RedefinitionFields:   redefinitionFields, lock: &sync.Mutex{}}
 	}

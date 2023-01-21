@@ -51,6 +51,16 @@ type Record struct {
 	LobEndTransaction bool
 }
 
+var chanRegexpIndex = make(chan *regexp.Regexp)
+
+func init() {
+	go func() {
+		for {
+			chanRegexpIndex <- regexp.MustCompile(`(?m)(\w+(\[(\d+),?(\d+)?\])?)`)
+		}
+	}()
+}
+
 func traverseHashValues(adaValue adatypes.IAdaValue, x interface{}) (adatypes.TraverseResult, error) {
 	record := x.(*Record)
 	//if _, ok := record.HashFields[adaValue.Type().Name()]; !ok {
@@ -113,7 +123,9 @@ func recordValuesTraverser(adaValue adatypes.IAdaValue, x interface{}) (adatypes
 
 // createRecordBuffer create a record buffer
 func (record *Record) createRecordBuffer(helper *adatypes.BufferHelper, option *adatypes.BufferOption) (err error) {
-	adatypes.Central.Log.Debugf("Create store record buffer")
+	if adatypes.Central.IsDebugLevel() {
+		adatypes.Central.Log.Debugf("Create store record buffer")
+	}
 	t := adatypes.TraverserValuesMethods{EnterFunction: createStoreRecordBufferTraverser}
 	stRecTraverser := &storeRecordTraverserStructure{record: record, helper: helper, option: option}
 	_, err = record.Traverse(t, stRecTraverser)
@@ -196,7 +208,8 @@ func (record *Record) searchValue(field string) (adatypes.IAdaValue, bool) {
 		adatypes.Central.Log.Debugf("Query failure: %v", err)
 		return nil, false
 	}
-	if adatypes.Central.IsDebugLevel() {
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
 		adatypes.Central.Log.Debugf("Search field %s (%s)", fq.Name, field)
 		for k, v := range record.HashFields {
 			adatypes.Central.Log.Debugf("Key: %s %#v", k, v)
@@ -207,12 +220,16 @@ func (record *Record) searchValue(field string) (adatypes.IAdaValue, bool) {
 		name = string(fq.Prefix) + fq.Name
 	}
 	if adaValue, ok := record.HashFields[name]; ok {
-		adatypes.Central.Log.Debugf("Found value %s (%v)", adaValue.Type().Name(), adaValue.Type().Type())
+		if debug {
+			adatypes.Central.Log.Debugf("Found value %s (%v)", adaValue.Type().Name(), adaValue.Type().Type())
+		}
 		if adaValue.Type().Type() == adatypes.FieldTypeMultiplefield && (fq.MultipleIndex > 0 || fq.PeriodicIndex > 0) {
 			sv := adaValue.(*adatypes.StructureValue)
 			for _, ve := range sv.Elements {
 				for _, v := range ve.Values {
-					adatypes.Central.Log.Debugf("PE %d MU %d", v.PeriodIndex(), v.MultipleIndex())
+					if debug {
+						adatypes.Central.Log.Debugf("PE %d MU %d", v.PeriodIndex(), v.MultipleIndex())
+					}
 					if fq.PeriodicIndex == v.PeriodIndex() && fq.MultipleIndex == v.MultipleIndex() {
 						return v, true
 					}
@@ -221,8 +238,8 @@ func (record *Record) searchValue(field string) (adatypes.IAdaValue, bool) {
 		}
 		return adaValue, true
 	}
-	adatypes.Central.Log.Debugf("Found no value for %s", name)
-	if adatypes.Central.IsDebugLevel() {
+	if debug {
+		adatypes.Central.Log.Debugf("Found no value for %s", name)
 		for k, v := range record.HashFields {
 			adatypes.Central.Log.Debugf("Key valid %s -> %s(%d)", k, v.Type().Name(), v.Type().Type())
 		}
@@ -240,8 +257,10 @@ func (record *Record) SetValue(field string, value interface{}) (err error) {
 		err = adatypes.NewGenericError(172)
 		return
 	}
-
-	adatypes.Central.Log.Debugf("Set value %s", field)
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
+		adatypes.Central.Log.Debugf("Set value %s", field)
+	}
 	if strings.ContainsRune(field, '[') {
 		i := strings.IndexRune(field, '[')
 		c := strings.IndexRune(field[i:], ',')
@@ -294,19 +313,27 @@ func (record *Record) SetValue(field string, value interface{}) (err error) {
 	}
 	if adaValue, ok := record.searchValue(field); ok {
 		err = adaValue.SetValue(value)
-		adatypes.Central.Log.Debugf("Set %s [%T] value err=%v", field, adaValue, err)
+		if debug {
+			adatypes.Central.Log.Debugf("Set %s [%T] value err=%v", field, adaValue, err)
+		}
 		// TODO check if the field which is not found and stored should be checked
 	} else {
-		adatypes.Central.Log.Debugf("Field %s not found %p", field, adaValue)
+		if debug {
+			adatypes.Central.Log.Debugf("Field %s not found %p", field, adaValue)
+		}
 		s, e2 := record.definition.SearchType(field)
-		adatypes.Central.Log.Debugf("Type %v not found %v", s, e2)
+		if debug {
+			adatypes.Central.Log.Debugf("Type %v not found %v", s, e2)
+		}
 		if e2 == nil {
 			if s.IsSpecialDescriptor() {
 				err = nil
 				adatypes.Central.Log.Debugf("Found %v is super descriptor and is ignored", field)
 				return
 			}
-			adatypes.Central.Log.Debugf("Found %v but no super descriptor", field)
+			if debug {
+				adatypes.Central.Log.Debugf("Found %v but no super descriptor", field)
+			}
 		}
 		err = adatypes.NewGenericError(28, field)
 	}
@@ -346,7 +373,7 @@ func (record *Record) SetPartialValue(name string, offset uint32, data []byte) (
 // extractIndex extract the index information RA[1] of the field
 func extractIndex(name string) []uint32 {
 	var index []uint32
-	var re = regexp.MustCompile(`(?m)(\w+(\[(\d+),?(\d+)?\])?)`)
+	var re = <-chanRegexpIndex
 	for _, s := range re.FindAllStringSubmatch(name, -1) {
 		v, err := strconv.ParseInt(s[3], 10, 0)
 		if err != nil {

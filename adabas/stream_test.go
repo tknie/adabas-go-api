@@ -55,6 +55,9 @@ func TestMapStreamValidation(t *testing.T) {
 	}
 	assert.Equal(t, 1, record.NrRecords())
 	refValue, err := record.Values[0].SearchValue("Picture")
+	if !assert.NoError(t, err) {
+		return
+	}
 	refData := refValue.Bytes()
 	assert.Equal(t, 769996, len(refData))
 	x := md5.Sum(refData)
@@ -146,6 +149,9 @@ func TestDirectStreamValidation(t *testing.T) {
 	}
 	assert.Equal(t, 1, record.NrRecords())
 	refValue, err := record.Values[0].SearchValue("DC")
+	if !assert.NoError(t, err) {
+		return
+	}
 	refData := refValue.Bytes()
 	assert.Equal(t, 769996, len(refData))
 

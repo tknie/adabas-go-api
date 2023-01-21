@@ -39,6 +39,16 @@ type AdaRange struct {
 	to   int
 }
 
+var chanRegexpRangeParser = make(chan *regexp.Regexp)
+
+func init() {
+	go func() {
+		for {
+			chanRegexpRangeParser <- regexp.MustCompile(`(?m)^(N|[0-9]*)-?(N|[0-9]*)?$`)
+		}
+	}()
+}
+
 // NewEmptyRange create an empty range
 func NewEmptyRange() *AdaRange {
 	return &AdaRange{from: noEntry, to: noEntry}
@@ -46,7 +56,7 @@ func NewEmptyRange() *AdaRange {
 
 // NewRangeParser new range using string parser
 func NewRangeParser(r string) *AdaRange {
-	var re = regexp.MustCompile(`(?m)^(N|[0-9]*)-?(N|[0-9]*)?$`)
+	var re = <-chanRegexpRangeParser
 
 	match := re.FindStringSubmatch(r)
 	if match == nil {

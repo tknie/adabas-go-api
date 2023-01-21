@@ -31,9 +31,9 @@ import (
 
 // URL define the desination of the host. Possible types are
 //
-//  - Local call with Driver="" and Port=0
-//  - Entire Network calls with Driver="tcpip" and corresponding host and port
-//  - Adabas TCP/IP calls with Driver="adatcp" and corresponding host and port
+//   - Local call with Driver="" and Port=0
+//   - Entire Network calls with Driver="tcpip" and corresponding host and port
+//   - Adabas TCP/IP calls with Driver="adatcp" and corresponding host and port
 //
 // Dependent on the Driver the corresponding connection is used. To use the local
 // call access the Adabas Client native library is used.
@@ -263,4 +263,15 @@ func (URL *URL) GetOption(option string) string {
 		}
 	}
 	return ""
+}
+
+// Compare compares equality of two URL
+func (URL *URL) Compare(nu *URL) bool {
+	if URL == nu {
+		return true
+	}
+	if URL.String() == nu.String() {
+		return true
+	}
+	return false
 }

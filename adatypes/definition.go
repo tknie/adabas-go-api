@@ -467,7 +467,9 @@ func (def *Definition) CheckField(name string) bool {
 	if len(def.activeFields) == 0 && len(def.Values) > 0 {
 		return true
 	}
-	Central.Log.Debugf("returning %v %d %d", ok, len(def.activeFields), len(def.Values))
+	if Central.IsDebugLevel() {
+		Central.Log.Debugf("returning %v %d %d", ok, len(def.activeFields), len(def.Values))
+	}
 	return ok
 }
 

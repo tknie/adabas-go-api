@@ -194,6 +194,8 @@ func createFieldDefinitionTable(fdtDef *adatypes.Definition) (definition *adatyp
 	stack := adatypes.NewStack()
 	definition.FileTime = fdtDef.Search(fdtTime)
 	var lastStruct adatypes.IAdaType
+
+	debug := adatypes.Central.IsDebugLevel()
 	for index := 1; index < nrFdtEntries+1; index++ {
 		value := fdt.Get(fdtIdentifier, index)
 
@@ -206,39 +208,53 @@ func createFieldDefinitionTable(fdtDef *adatypes.Definition) (definition *adatyp
 			if err != nil {
 				return
 			}
-			adatypes.Central.Log.Debugf("Found normal field %s level=%d fieldType=%v", fieldType.Name(), fieldType.Level(), fieldType.Type())
+			if debug {
+				adatypes.Central.Log.Debugf("Found normal field %s level=%d fieldType=%v", fieldType.Name(), fieldType.Level(), fieldType.Type())
+			}
 		case fieldIdentifierSub.code(), fieldIdentifierSuper.code():
-			adatypes.Central.Log.Debugf("Found Super/Sub field %c", value.Value().(byte))
+			if debug {
+				adatypes.Central.Log.Debugf("Found Super/Sub field %c", value.Value().(byte))
+			}
 			fieldType, err = createSubSuperDescriptorType(fdt, index)
 			if err != nil {
 				return
 			}
 		case fieldIdentifierPhonetic.code():
-			adatypes.Central.Log.Debugf("Found Super/Sub field %c", value.Value().(byte))
+			if debug {
+				adatypes.Central.Log.Debugf("Found Super/Sub field %c", value.Value().(byte))
+			}
 			fieldType, err = createPhoneticType(fdt, index)
 			if err != nil {
 				return
 			}
 		case fieldIdentifierCollation.code():
-			adatypes.Central.Log.Debugf("Found Collation field %c", value.Value().(byte))
+			if debug {
+				adatypes.Central.Log.Debugf("Found Collation field %c", value.Value().(byte))
+			}
 			fieldType, err = createCollationType(fdt, index)
 			if err != nil {
 				return
 			}
 		case fieldIdentifierHyperexit.code():
-			adatypes.Central.Log.Debugf("Found HyperExit field %c", value.Value().(byte))
+			if debug {
+				adatypes.Central.Log.Debugf("Found HyperExit field %c", value.Value().(byte))
+			}
 			fieldType, err = createHyperExitType(fdt, index)
 			if err != nil {
 				return
 			}
 		case fieldIdentifierReferential.code():
-			adatypes.Central.Log.Debugf("Found Referential field %c", value.Value().(byte))
+			if debug {
+				adatypes.Central.Log.Debugf("Found Referential field %c", value.Value().(byte))
+			}
 			fieldType, err = createReferential(fdt, index)
 			if err != nil {
 				return
 			}
 		default:
-			fmt.Printf("Not implemented already >%c<\n", value.Value().(byte))
+			if debug {
+				fmt.Printf("Not implemented already >%c<\n", value.Value().(byte))
+			}
 			err = adatypes.NewGenericError(11, value.Value().(byte), value.Value().(byte))
 			return
 		}
@@ -246,7 +262,7 @@ func createFieldDefinitionTable(fdtDef *adatypes.Definition) (definition *adatyp
 			for {
 				if lastStruct != nil {
 					if lastStruct.Level() == fieldType.Level()-1 {
-						if adatypes.Central.IsDebugLevel() {
+						if debug {
 							adatypes.Central.Log.Debugf("Append to structure %s add %s %d", lastStruct.Name(), fieldType.String(), fieldType.Level())
 						}
 						lastStruct.(*adatypes.StructureType).AddField(fieldType)
@@ -256,40 +272,44 @@ func createFieldDefinitionTable(fdtDef *adatypes.Definition) (definition *adatyp
 						if popElement == nil {
 							lastStruct = nil
 							definition.AppendType(fieldType)
-							if adatypes.Central.IsDebugLevel() {
+							if debug {
 								adatypes.Central.Log.Debugf("%s append to main %v", fieldType.Name(), fieldType.Type())
 							}
 							break
 						} else {
-							if adatypes.Central.IsDebugLevel() {
+							if debug {
 								adatypes.Central.Log.Debugf("Pop from Stack %v", popElement)
 							}
 							lastStruct = popElement.(adatypes.IAdaType)
-							if adatypes.Central.IsDebugLevel() {
+							if debug {
 								adatypes.Central.Log.Debugf("Level equal last=%s %d current=%s %d",
 									lastStruct.String(), lastStruct.Level(), fieldType.String(), fieldType.Level())
 							}
 						}
 					}
 				} else {
-					adatypes.Central.Log.Debugf("Append to main %d %s", fieldType.Level(), fieldType.Name())
+					if debug {
+						adatypes.Central.Log.Debugf("Append to main %d %s", fieldType.Level(), fieldType.Name())
+					}
 					definition.AppendType(fieldType)
 					break
 				}
 			}
 			if fieldType.IsStructure() && fieldType.Type() != adatypes.FieldTypeMultiplefield {
 				lastStruct = fieldType
-				if adatypes.Central.IsDebugLevel() {
+				if debug {
 					adatypes.Central.Log.Debugf("Pop to MU Stack %v", lastStruct)
 				}
 				stack.Push(lastStruct)
 			}
-			if adatypes.Central.IsDebugLevel() {
+			if debug {
 				adatypes.Central.Log.Debugf("Current structure %v", lastStruct)
 			}
 			definition.Register(fieldType)
 		}
-		adatypes.Central.Log.Debugf("Field type DONE")
+		if debug {
+			adatypes.Central.Log.Debugf("Field type DONE")
+		}
 	}
 	definition.InitReferences()
 
@@ -307,11 +327,15 @@ func createFieldType(fdt *adatypes.StructureValue, index int) (fieldType adatype
 	sysf := fdt.Get("fieldSYfunction", index).Value().(uint8)
 	editMask := fdt.Get("fieldEditMask", index).Value().(uint8)
 	subOption := fdt.Get("fieldSubOption", index).Value().(uint8)
-
-	adatypes.Central.Log.Debugf("Create field type %s check option=%v check containing %v", name, option, fdtFlagOption1PE)
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
+		adatypes.Central.Log.Debugf("Create field type %s check option=%v check containing %v", name, option, fdtFlagOption1PE)
+	}
 	// Check if field is period element
 	if level == 1 && option&(1<<fdtFlagOption1PE) > 0 {
-		adatypes.Central.Log.Debugf("%s is PE", name)
+		if debug {
+			adatypes.Central.Log.Debugf("%s is PE", name)
+		}
 		fieldType = adatypes.NewStructureEmpty(adatypes.FieldTypePeriodGroup, name, adatypes.OccUInt2, level)
 	} else {
 		// Normal field, check format
@@ -354,7 +378,9 @@ func createFieldType(fdt *adatypes.StructureValue, index int) (fieldType adatype
 				return
 			}
 		case ' ':
-			adatypes.Central.Log.Debugf("%s created as Group", name)
+			if debug {
+				adatypes.Central.Log.Debugf("%s created as Group", name)
+			}
 			fieldType = adatypes.NewStructureEmpty(adatypes.FieldTypeGroup, name, adatypes.OccSingle, level)
 			return
 		default:
@@ -363,7 +389,9 @@ func createFieldType(fdt *adatypes.StructureValue, index int) (fieldType adatype
 		}
 
 		// flag option check
-		adatypes.Central.Log.Debugf("Id=%d name=%s length=%d format=%c", id, name, length, fdtFormat)
+		if debug {
+			adatypes.Central.Log.Debugf("Id=%d name=%s length=%d format=%c", id, name, length, fdtFormat)
+		}
 		if (option & (1 << fdtFlagOption1MU)) > 0 {
 			newType := adatypes.NewTypeWithLength(id, name, length)
 			evaluateOption(newType, option, option2)
@@ -372,14 +400,20 @@ func createFieldType(fdt *adatypes.StructureValue, index int) (fieldType adatype
 			newType.SubOption = subOption
 
 			newType.AddFlag(adatypes.FlagOptionAtomicFB)
-			adatypes.Central.Log.Debugf("%s created as MU  on top of the field MU=%v %p", name, newType.HasFlagSet(adatypes.FlagOptionAtomicFB), newType)
+			if debug {
+				adatypes.Central.Log.Debugf("%s created as MU  on top of the field MU=%v %p", name, newType.HasFlagSet(adatypes.FlagOptionAtomicFB), newType)
+			}
 
 			fieldTypes := []adatypes.IAdaType{newType}
 			fieldType = adatypes.NewStructureList(adatypes.FieldTypeMultiplefield, name, adatypes.OccUInt2, fieldTypes)
-			adatypes.Central.Log.Debugf("%s MU structure %d -> %p", fieldType.Name(), fieldType.(*adatypes.StructureType).NrFields(), fieldType)
+			if debug {
+				adatypes.Central.Log.Debugf("%s MU structure %d -> %p", fieldType.Name(), fieldType.(*adatypes.StructureType).NrFields(), fieldType)
+			}
 		} else {
 			newType := adatypes.NewTypeWithLength(id, name, length)
-			adatypes.Central.Log.Debugf("%s created as normal field %p", name, newType)
+			if debug {
+				adatypes.Central.Log.Debugf("%s created as normal field %p", name, newType)
+			}
 			evaluateOption(newType, option, option2)
 			newType.SysField = sysf
 			newType.EditMask = editMask
@@ -532,18 +566,27 @@ func evaluateOption(fieldType *adatypes.AdaType, option uint8, option2 uint8) {
 	flags2 := [...]int{fdtFlagOption2NC.iv(), fdtFlagOption2NN.iv(), fdtFlagOption2HF.iv(), fdtFlagOption2NV.iv(), fdtFlagOption2NB.iv()}
 	optionFlags2 := []adatypes.FieldOption{adatypes.FieldOptionNC, adatypes.FieldOptionNN, adatypes.FieldOptionHF, adatypes.FieldOptionNV, adatypes.FieldOptionNB}
 
-	adatypes.Central.Log.Debugf("Evaluate Options %x", option)
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
+		adatypes.Central.Log.Debugf("Evaluate Options %x", option)
+	}
 	for i := 0; i < len(flags); i++ {
 		if (option & (1 << uint32(flags[i]))) > 0 {
-			adatypes.Central.Log.Debugf("%s Option %d", fieldType.String(), i)
+			if debug {
+				adatypes.Central.Log.Debugf("%s Option %d", fieldType.String(), i)
+			}
 			fieldType.AddOption(optionFlags[i])
 		}
 	}
 
-	adatypes.Central.Log.Debugf("Evaluate Options2 %v", option2)
+	if debug {
+		adatypes.Central.Log.Debugf("Evaluate Options2 %v", option2)
+	}
 	for i := 0; i < len(flags2); i++ {
 		if (option2 & (1 << uint32(flags2[i]))) > 0 {
-			adatypes.Central.Log.Debugf("%s Option2 %d", fieldType.String(), i)
+			if debug {
+				adatypes.Central.Log.Debugf("%s Option2 %d", fieldType.String(), i)
+			}
 			fieldType.AddOption(optionFlags2[i])
 		}
 	}

@@ -83,13 +83,18 @@ func NewStoreRequest(param ...interface{}) (*StoreRequest, error) {
 		m := param[1].(*Map)
 		return createNewMapPointerStoreRequest(p, m)
 	default:
+		debug := adatypes.Central.IsDebugLevel()
 		ti := reflect.TypeOf(param[0])
-		adatypes.Central.Log.Debugf("It's a struct %s", ti.Name())
+		if debug {
+			adatypes.Central.Log.Debugf("It's a struct %s", ti.Name())
+		}
 		if ti.Kind() == reflect.Ptr {
 			ti = ti.Elem()
 		}
 		if ti.Kind() == reflect.Struct {
-			adatypes.Central.Log.Debugf("It's a struct %s", ti.Name())
+			if debug {
+				adatypes.Central.Log.Debugf("It's a struct %s", ti.Name())
+			}
 			mapName := ti.Name()
 			if len(param) < 2 {
 				return nil, errors.New("not enough parameters for NewStoreRequest")
@@ -127,12 +132,16 @@ func NewStoreRequest(param ...interface{}) (*StoreRequest, error) {
 					adabas:    ada,
 					adabasMap: adabasMap, repository: dataRepository}}
 			}
-			adatypes.Central.Log.Debugf("Data reference %s", request.adabas.URL.String())
-			adatypes.Central.Log.Debugf("Map reference %s", request.adabasMap.Repository.URL.String())
+			if debug {
+				adatypes.Central.Log.Debugf("Data reference %s", request.adabas.URL.String())
+				adatypes.Central.Log.Debugf("Map reference %s", request.adabasMap.Repository.URL.String())
+			}
 			request.createDynamic(param[0])
 			return request, nil
 		}
-		adatypes.Central.Log.Errorf("Unknown kind: %s", reflect.TypeOf(param[0]).Kind())
+		if debug {
+			adatypes.Central.Log.Errorf("Unknown kind: %s", reflect.TypeOf(param[0]).Kind())
+		}
 	}
 
 	return nil, adatypes.NewGenericError(79)
@@ -237,20 +246,25 @@ func (request *StoreRequest) StoreFields(param ...interface{}) (err error) {
 	if err != nil {
 		return
 	}
-	if adatypes.Central.IsDebugLevel() {
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
 		adatypes.Central.Log.Debugf("Check store fields Definition values %#v", request.definition.Values)
 		adatypes.Central.Log.Debugf("Dump all fields")
 		request.definition.DumpTypes(true, true)
 	}
 	switch f := param[0].(type) {
 	case string:
-		adatypes.Central.Log.Debugf("Store restrict fields to %s", f)
+		if debug {
+			adatypes.Central.Log.Debugf("Store restrict fields to %s", f)
+		}
 		err = request.definition.ShouldRestrictToFields(f)
 		if err != nil {
 			return
 		}
 	case []string:
-		adatypes.Central.Log.Debugf("Store restrict fields to %v", f)
+		if debug {
+			adatypes.Central.Log.Debugf("Store restrict fields to %v", f)
+		}
 		err = request.definition.ShouldRestrictToFieldSlice(f)
 		if err != nil {
 			return
@@ -261,14 +275,16 @@ func (request *StoreRequest) StoreFields(param ...interface{}) (err error) {
 		// query. Remove field names which are not part.
 		for k := range request.dynamic.FieldNames {
 			if request.definition.Search(k) == nil {
-				adatypes.Central.Log.Debugf("Remove dynamic field %s", k)
+				if debug {
+					adatypes.Central.Log.Debugf("Remove dynamic field %s", k)
+				}
 				if k != "" && k[0] != '#' {
 					delete(request.dynamic.FieldNames, k)
 				}
 			}
 		}
 	}
-	if adatypes.Central.IsDebugLevel() {
+	if debug {
 		request.definition.DumpTypes(true, true)
 		adatypes.Central.Log.Debugf("Definition values %#v", request.definition.Values)
 	}
@@ -283,7 +299,9 @@ func (request *StoreRequest) CreateRecord() (record *Record, err error) {
 		adatypes.Central.Log.Debugf("Error creating values %v", err)
 		return
 	}
-	adatypes.Central.Log.Debugf("Create record Definitons %#v", request.definition)
+	if adatypes.Central.IsDebugLevel() {
+		adatypes.Central.Log.Debugf("Create record Definitons %#v", request.definition)
+	}
 	record, xerr := NewRecord(request.definition)
 	if xerr != nil {
 		adatypes.Central.Log.Debugf("Error creating record %v", xerr)
@@ -303,19 +321,26 @@ func (request *StoreRequest) Store(storeRecord *Record) error {
 		}
 	}
 	request.definition.Values = storeRecord.SelectValue(request.definition)
-	adatypes.Central.Log.Debugf("Prepare store request")
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
+		adatypes.Central.Log.Debugf("Prepare store request")
+	}
 	adabasRequest, prepareErr := request.prepareRequest(false)
 	if prepareErr != nil {
 		return prepareErr
 	}
-	adatypes.Central.Log.Debugf("Prepared store request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	if debug {
+		adatypes.Central.Log.Debugf("Prepared store request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	}
 	//	storeRecord
 	helper := adatypes.NewDynamicHelper(Endian())
 	err := storeRecord.createRecordBuffer(helper, adabasRequest.Option)
 	if err != nil {
 		return err
 	}
-	adatypes.Central.Log.Debugf("Create store request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	if debug {
+		adatypes.Central.Log.Debugf("Create store request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	}
 
 	adabasRequest.RecordBuffer = helper
 	err = request.adabas.Store(request.repository.Fnr, adabasRequest)
@@ -324,12 +349,15 @@ func (request *StoreRequest) Store(storeRecord *Record) error {
 	}
 	storeRecord.Isn = adabasRequest.Isn
 	// Reset values after storage to reset for next store request
-	adatypes.Central.Log.Debugf("After store request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	if debug {
+		adatypes.Central.Log.Debugf("After store request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	}
 	return request.secondStore(adabasRequest, storeRecord)
 }
 
 func (request *StoreRequest) secondStore(adabasRequest *adatypes.Request, storeRecord *Record) error {
 
+	debug := adatypes.Central.IsDebugLevel()
 	needSecondCall := adabasRequest.Option.NeedSecondCall
 	for needSecondCall != adatypes.NoneSecond {
 		adabasRequest.Option.SecondCall++
@@ -339,7 +367,9 @@ func (request *StoreRequest) secondStore(adabasRequest *adatypes.Request, storeR
 			return prepareErr
 		}
 		adabasRequest.Isn = storeRecord.Isn
-		adatypes.Central.Log.Debugf("Prepared update request done need second = %v", adabasRequest.Option.NeedSecondCall)
+		if debug {
+			adatypes.Central.Log.Debugf("Prepared update request done need second = %v", adabasRequest.Option.NeedSecondCall)
+		}
 		helper := adatypes.NewDynamicHelper(Endian())
 		err := storeRecord.createRecordBuffer(helper, adabasRequest.Option)
 		if err != nil {
@@ -351,7 +381,9 @@ func (request *StoreRequest) secondStore(adabasRequest *adatypes.Request, storeR
 			return err
 		}
 		needSecondCall = adabasRequest.Option.NeedSecondCall
-		adatypes.Central.Log.Debugf("After update request done need second = %v", adabasRequest.Option.NeedSecondCall)
+		if debug {
+			adatypes.Central.Log.Debugf("After update request done need second = %v", adabasRequest.Option.NeedSecondCall)
+		}
 		if storeRecord.LobEndTransaction {
 			err = request.EndTransaction()
 			if err != nil {
@@ -401,7 +433,9 @@ func (request *StoreRequest) Exchange(storeRecord *Record) error {
 	if err != nil {
 		return err
 	}
-	adatypes.Central.Log.Debugf("After update request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	if adatypes.Central.IsDebugLevel() {
+		adatypes.Central.Log.Debugf("After update request done need second = %v", adabasRequest.Option.NeedSecondCall)
+	}
 	return request.secondStore(adabasRequest, storeRecord)
 }
 
@@ -431,11 +465,16 @@ func (request *StoreRequest) EndTransaction() error {
 
 // searchDynamicValue search dynamic value in the interface
 func searchDynamicValue(value reflect.Value, fn []string) (v reflect.Value, ok bool) {
-	adatypes.Central.Log.Debugf("Search dynamic interface value %v %d", fn, len(fn))
+	debug := adatypes.Central.IsDebugLevel()
+	if debug {
+		adatypes.Central.Log.Debugf("Search dynamic interface value %v %d", fn, len(fn))
+	}
 	v = value
 	ok = false
 	for _, f := range fn {
-		adatypes.Central.Log.Debugf("FieldName search %s", f)
+		if debug {
+			adatypes.Central.Log.Debugf("FieldName search %s", f)
+		}
 		v = v.FieldByName(f)
 		switch v.Kind() {
 		case reflect.Ptr:
@@ -443,7 +482,9 @@ func searchDynamicValue(value reflect.Value, fn []string) (v reflect.Value, ok b
 		case reflect.Slice:
 			return v, true
 		}
-		adatypes.Central.Log.Debugf("New value %v kind=%s", v, v.Kind())
+		if debug {
+			adatypes.Central.Log.Debugf("New value %v kind=%s", v, v.Kind())
+		}
 		ok = v.IsValid()
 	}
 	return v, ok

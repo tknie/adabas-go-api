@@ -33,8 +33,8 @@ import (
  */
 const abdEyecatcher = 'G' /*      G - EYECATCHER              */
 const abdVersion = '2'    /*      2 - VERSION                 */
-//const E_ABD_EYECATCHER = 0xc7 /* EBCDIC G - EYECATCHER            */
-//const E_ABD_VERSION = 0xf2    /* EBCDIC 2 - VERSION               */
+// const E_ABD_EYECATCHER = 0xc7 /* EBCDIC G - EYECATCHER            */
+// const E_ABD_VERSION = 0xf2    /* EBCDIC 2 - VERSION               */
 const (
 	AbdAQFb  = ('F') /*      F-Format Buffer             */
 	AbdAQRb  = ('R') /*      R-Record Buffer             */

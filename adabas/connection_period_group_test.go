@@ -462,7 +462,7 @@ func TestPEAndMU(t *testing.T) {
 		return
 	}
 	jsonHistogram, err := json.Marshal(result)
-	if !assert.NoError(t, rerr) {
+	if !assert.NoError(t, err) {
 		return
 	}
 	validateFile(t, "PEandMU", jsonHistogram, jsonType)

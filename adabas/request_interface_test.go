@@ -55,6 +55,10 @@ func TestStoreRequestInterfaceInstance(t *testing.T) {
 
 	adatypes.Central.Log.Infof("TEST: %s", t.Name())
 
+	tracker := &Tracker{trackAdabas}
+	RegisterTracker(tracker)
+	defer ClearTracker()
+
 	ada, _ := NewAdabas(adabasModDBID)
 	defer ada.Close()
 	repository := NewMapRepository(ada, 4)
@@ -98,10 +102,12 @@ func TestStoreRequestInterfaceInstance(t *testing.T) {
 		}
 	}
 
+	fmt.Println("Check store request")
 	storeRequest, err := NewStoreRequest(Employees{}, ada, repository)
 	if !assert.NoError(t, err) {
 		return
 	}
+	fmt.Println("Define queries")
 	err = storeRequest.StoreFields("*")
 	if !assert.NoError(t, err) {
 		return
@@ -109,6 +115,7 @@ func TestStoreRequestInterfaceInstance(t *testing.T) {
 	assert.NotEqual(t, (*adatypes.DynamicInterface)(nil), storeRequest.commonRequest.dynamic)
 	assert.NotNil(t, storeRequest)
 	assert.Equal(t, "Employees", storeRequest.dynamic.DataType.Name())
+	fmt.Println("Copy request")
 	readRequest, rErr := NewReadRequest(storeRequest)
 	if !assert.NoError(t, rErr) {
 		return

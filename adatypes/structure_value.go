@@ -166,8 +166,8 @@ func countPEsize(adaType IAdaType, parentType IAdaType, level int, x interface{}
 }
 
 /*
- Parse buffer if a period group contains multiple fields. In that case the buffer parser need to parse
- field by field and not the group alltogether
+Parse buffer if a period group contains multiple fields. In that case the buffer parser need to parse
+field by field and not the group alltogether
 */
 func (value *StructureValue) parseBufferWithMUPE(helper *BufferHelper, option *BufferOption) (res TraverseResult, err error) {
 	Central.Log.Debugf("Parse Buffer structure with (MUPE) name=%s offset=%d remaining=%d length=%d value length=%d", value.Type().Name(),
@@ -356,7 +356,10 @@ func (value *StructureValue) parsePeriodGroup(helper *BufferHelper, option *Buff
 }
 
 func (value *StructureValue) parsePeriodMultiple(helper *BufferHelper, option *BufferOption) (res TraverseResult, err error) {
-	Central.Log.Debugf("Parse MU in PE added nodes")
+	debug := Central.IsDebugLevel()
+	if debug {
+		Central.Log.Debugf("Parse MU in PE added nodes")
+	}
 	for _, e := range value.Elements {
 		for _, v := range e.Values {
 			v.Type().AddFlag(FlagOptionSecondCall)
@@ -364,10 +367,14 @@ func (value *StructureValue) parsePeriodMultiple(helper *BufferHelper, option *B
 			if err != nil {
 				return
 			}
-			Central.Log.Debugf("Parsed Value %s -> len=%s type=%T", v.Type().Name(), len(v.Bytes()), v)
+			if debug {
+				Central.Log.Debugf("Parsed Value %s -> len=%s type=%T", v.Type().Name(), len(v.Bytes()), v)
+			}
 		}
 	}
-	Central.Log.Debugf("End parsing MU in PE")
+	if debug {
+		Central.Log.Debugf("End parsing MU in PE")
+	}
 	res = SkipTree
 	return
 }
@@ -380,8 +387,10 @@ func (value *StructureValue) parseBuffer(helper *BufferHelper, option *BufferOpt
 			return
 		}
 	}
-	Central.Log.Debugf("Parse structure buffer %s/%s secondCall=%v offset=%d/%X pe=%v mu=%v", value.Type().Name(), value.Type().ShortName(),
-		option.SecondCall, helper.offset, helper.offset, value.adatype.HasFlagSet(FlagOptionPE), value.adatype.HasFlagSet(FlagOptionAtomicFB))
+	if Central.IsDebugLevel() {
+		Central.Log.Debugf("Parse structure buffer %s/%s secondCall=%v offset=%d/%X pe=%v mu=%v", value.Type().Name(), value.Type().ShortName(),
+			option.SecondCall, helper.offset, helper.offset, value.adatype.HasFlagSet(FlagOptionPE), value.adatype.HasFlagSet(FlagOptionAtomicFB))
+	}
 	if value.adatype.HasFlagSet(FlagOptionPE) && value.adatype.HasFlagSet(FlagOptionAtomicFB) {
 		return value.parseBufferWithMUPE(helper, option)
 	}
@@ -391,12 +400,17 @@ func (value *StructureValue) parseBuffer(helper *BufferHelper, option *BufferOpt
 // Evaluate the occurrence of the structure
 func (value *StructureValue) evaluateOccurrence(helper *BufferHelper) (occNumber int, err error) {
 	subStructureType := value.adatype.(*StructureType)
+	debug := Central.IsDebugLevel()
 	switch {
 	case subStructureType.Type() == FieldTypePeriodGroup && subStructureType.peRange.IsSingleIndex():
-		Central.Log.Debugf("Single PE index occurence only 1")
+		if debug {
+			Central.Log.Debugf("Single PE index occurence only 1")
+		}
 		return 1, nil
 	case subStructureType.Type() == FieldTypeMultiplefield && subStructureType.muRange.IsSingleIndex():
-		Central.Log.Debugf("Single MU index occurence only 1")
+		if debug {
+			Central.Log.Debugf("Single MU index occurence only 1")
+		}
 		return 1, nil
 	case subStructureType.Type() == FieldTypePeriodGroup && subStructureType.HasFlagSet(FlagOptionSingleIndex):
 		if len(value.Elements) > 0 {
@@ -404,7 +418,7 @@ func (value *StructureValue) evaluateOccurrence(helper *BufferHelper) (occNumber
 		}
 		subStructureType.occ = 1
 	default:
-		if Central.IsDebugLevel() {
+		if debug {
 			Central.Log.Debugf("Single index flag: %v (%s)", subStructureType.HasFlagSet(FlagOptionSingleIndex), subStructureType.Type().name())
 			Central.Log.Debugf("PE range: %s", subStructureType.peRange.FormatBuffer())
 			Central.Log.Debugf("MU range: %s", subStructureType.muRange.FormatBuffer())
@@ -415,7 +429,9 @@ func (value *StructureValue) evaluateOccurrence(helper *BufferHelper) (occNumber
 	// 	return 1, nil
 	// }
 	occNumber = math.MaxInt32
-	Central.Log.Debugf("Current structure occurrence %d", subStructureType.occ)
+	if debug {
+		Central.Log.Debugf("Current structure occurrence %d", subStructureType.occ)
+	}
 	if subStructureType.occ > 0 {
 		occNumber = subStructureType.occ
 	} else {
@@ -439,26 +455,33 @@ func (value *StructureValue) evaluateOccurrence(helper *BufferHelper) (occNumber
 		case OccNone:
 		}
 	}
-	Central.Log.Debugf("Evaluate occurrence for %s of type %d to %d offset after=%d", value.Type().Name(),
-		subStructureType.occ, occNumber, helper.offset)
+	if debug {
+		Central.Log.Debugf("Evaluate occurrence for %s of type %d to %d offset after=%d", value.Type().Name(),
+			subStructureType.occ, occNumber, helper.offset)
+	}
 	return
 }
 
 // Parse the buffer containing no PE and MU fields
 func (value *StructureValue) parseBufferWithoutMUPE(helper *BufferHelper, option *BufferOption) (res TraverseResult, err error) {
-	if Central.IsDebugLevel() {
+	debug := Central.IsDebugLevel()
+	if debug {
 		Central.Log.Debugf("Parse Buffer structure without MUPE name=%s offset=%d remaining=%d length=%d value length=%d type=%d", value.Type().Name(),
 			helper.offset, helper.Remaining(), len(helper.buffer), len(value.Elements), value.Type().Type())
 	}
 
 	var occNumber int
-	Central.Log.Debugf("Check descriptor read %v", option.DescriptorRead)
+	if debug {
+		Central.Log.Debugf("Check descriptor read %v", option.DescriptorRead)
+	}
 	if option.DescriptorRead {
 		occNumber = 1
 	} else {
 		if option.SecondCall > 0 /*&& value.Type().Type() == FieldTypePeriodGroup */ {
 			occNumber = value.NrElements()
-			Central.Log.Debugf("Second call use available occurrence %d", occNumber)
+			if debug {
+				Central.Log.Debugf("Second call use available occurrence %d", occNumber)
+			}
 		} else {
 			occNumber, err = value.evaluateOccurrence(helper)
 			if err != nil {
@@ -470,10 +493,14 @@ func (value *StructureValue) parseBufferWithoutMUPE(helper *BufferHelper, option
 			return SkipTree, NewGenericError(182, value.Type().Name(), occNumber)
 		}
 	}
-	Central.Log.Debugf("Occurrence %d period parent index=%d", occNumber, value.peIndex)
+	if debug {
+		Central.Log.Debugf("Occurrence %d period parent index=%d", occNumber, value.peIndex)
+	}
 	switch value.Type().Type() {
 	case FieldTypePeriodGroup:
-		Central.Log.Debugf("Init period group values occurrence=%d mainframe=%v", occNumber, option.Mainframe)
+		if debug {
+			Central.Log.Debugf("Init period group values occurrence=%d mainframe=%v", occNumber, option.Mainframe)
+		}
 		if occNumber == 0 {
 			if option.Mainframe {
 				err = value.shiftEmptyMfBuffer(helper)
@@ -481,13 +508,17 @@ func (value *StructureValue) parseBufferWithoutMUPE(helper *BufferHelper, option
 					return EndTraverser, err
 				}
 			}
-			Central.Log.Debugf("Skip PE shifted to offset=%d/%X", helper.offset, helper.offset)
+			if debug {
+				Central.Log.Debugf("Skip PE shifted to offset=%d/%X", helper.offset, helper.offset)
+			}
 			return
 		}
 		for i := uint32(0); i < uint32(occNumber); i++ {
 			value.initSubValues(i+1, i+1, true)
 		}
-		Central.Log.Debugf("Init period group sub values finished, elements=%d ", value.NrElements())
+		if debug {
+			Central.Log.Debugf("Init period group sub values finished, elements=%d ", value.NrElements())
+		}
 		return
 	case FieldTypeMultiplefield:
 		if occNumber == 0 {
@@ -495,33 +526,47 @@ func (value *StructureValue) parseBufferWithoutMUPE(helper *BufferHelper, option
 				adaType := value.Type().(*StructureType)
 				helper.ReceiveBytes(adaType.SubTypes[0].Length())
 			}
-			Central.Log.Debugf("Skip MU shifted to offset=%d/%X", helper.offset, helper.offset)
+			if debug {
+				Central.Log.Debugf("Skip MU shifted to offset=%d/%X", helper.offset, helper.offset)
+			}
 			return
 		}
-		Central.Log.Debugf("Init multiple field sub values")
+		if debug {
+			Central.Log.Debugf("Init multiple field sub values")
+		}
 		lastNumber := uint32(occNumber)
 		adaType := value.Type().(*StructureType)
 		if adaType.muRange.multiplier() != allEntries {
 			occNumber = adaType.muRange.multiplier()
 		}
-		Central.Log.Debugf("Defined range for values: %s", adaType.muRange.FormatBuffer())
+		if debug {
+			Central.Log.Debugf("Defined range for values: %s", adaType.muRange.FormatBuffer())
+		}
 		for i := uint32(0); i < uint32(occNumber); i++ {
 			muIndex := adaType.muRange.index(i+1, lastNumber)
-			Central.Log.Debugf("%d. Work on MU index = %d/%d", i, muIndex, lastNumber)
+			if debug {
+				Central.Log.Debugf("%d. Work on MU index = %d/%d", i, muIndex, lastNumber)
+			}
 			value.initMultipleSubValues(i, value.peIndex, muIndex, true)
 		}
-		Central.Log.Debugf("Init multiple fields sub values finished")
+		if debug {
+			Central.Log.Debugf("Init multiple fields sub values finished")
+		}
 		return
 	case FieldTypeStructure:
 	default:
-		Central.Log.Debugf("Unused type=%d", value.Type().Type())
+		if debug {
+			Central.Log.Debugf("Unused type=%d", value.Type().Type())
+		}
 		return
 	}
-	Central.Log.Debugf("Start going through elements=%d", value.NrElements())
+	if debug {
+		Central.Log.Debugf("Start going through elements=%d", value.NrElements())
+	}
 	// Go through all occurrences and check remaining buffer size
 	index := 0
 	for index < occNumber && helper.Remaining() > 0 {
-		if Central.IsDebugLevel() {
+		if debug {
 			Central.Log.Debugf("index=%d remaining Buffer structure remaining=%d pos=%d",
 				index, helper.Remaining(), helper.offset)
 		}
@@ -529,7 +574,9 @@ func (value *StructureValue) parseBufferWithoutMUPE(helper *BufferHelper, option
 		if pErr != nil {
 			res = EndTraverser
 			err = pErr
-			Central.Log.Debugf("Parse buffer error in structure %s:%v", value.adatype.Name(), err)
+			if debug {
+				Central.Log.Debugf("Parse buffer error in structure %s:%v", value.adatype.Name(), err)
+			}
 			return
 		}
 		if len(value.Elements) <= index {
@@ -541,12 +588,12 @@ func (value *StructureValue) parseBufferWithoutMUPE(helper *BufferHelper, option
 			value.Elements[index].Values = values
 		}
 		index++
-		if Central.IsDebugLevel() {
+		if debug {
 			Central.Log.Debugf("------------------ Ending Parse index of structure index=%d len elements=%d",
 				index, len(value.Elements))
 		}
 	}
-	if Central.IsDebugLevel() {
+	if debug {
 		Central.Log.Debugf("Sructure parse ready for %s index=%d occ=%d value length=%d pos=%d",
 			value.Type().Name(), index, occNumber, len(value.Elements), helper.offset)
 	}
@@ -669,7 +716,8 @@ func (value *StructureValue) Traverse(t TraverserValuesMethods, x interface{}) (
 
 // Get get the value of an named tree node with an specific index
 func (value *StructureValue) Get(fieldName string, index int) IAdaValue {
-	if Central.IsDebugLevel() {
+	debug := Central.IsDebugLevel()
+	if debug {
 		Central.Log.Debugf("Get field %s index %d -> %d", fieldName, index, len(value.Elements))
 	}
 	if len(value.Elements) < index {
@@ -678,14 +726,22 @@ func (value *StructureValue) Get(fieldName string, index int) IAdaValue {
 	}
 	structElement := value.Elements[index-1]
 	if vr, ok := structElement.valueMap[fieldName]; ok {
-		Central.Log.Debugf("Got value map entry %#v", structElement.valueMap)
+		if debug {
+			Central.Log.Debugf("Got value map entry %#v", structElement.valueMap)
+		}
 		return vr
 	}
-	Central.Log.Debugf("Nr values %d", len(structElement.Values))
+	if debug {
+		Central.Log.Debugf("Nr values %d", len(structElement.Values))
+	}
 	for _, vr := range structElement.Values {
-		Central.Log.Debugf("Check %s -> %s", vr.Type().Name(), fieldName)
+		if debug {
+			Central.Log.Debugf("Check %s -> %s", vr.Type().Name(), fieldName)
+		}
 		if vr.Type().Name() == fieldName {
-			Central.Log.Debugf("Found index %d to %s[%d,%d]", index, vr.Type().Name(), vr.PeriodIndex(), vr.MultipleIndex())
+			if debug {
+				Central.Log.Debugf("Found index %d to %s[%d,%d]", index, vr.Type().Name(), vr.PeriodIndex(), vr.MultipleIndex())
+			}
 			return vr
 		}
 		if vr.Type().IsStructure() {
@@ -695,7 +751,9 @@ func (value *StructureValue) Get(fieldName string, index int) IAdaValue {
 			}
 		}
 	}
-	Central.Log.Debugf("No %s entry found with index=%d", fieldName, index)
+	if debug {
+		Central.Log.Debugf("No %s entry found with index=%d", fieldName, index)
+	}
 	return nil
 }
 

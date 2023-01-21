@@ -69,6 +69,7 @@ func NewAdabasID() *ID {
 // AdabasClient library support
 func (adabas *Adabas) CallAdabas() (err error) {
 	defer TimeTrack(time.Now(), "RCall adabas", adabas)
+	defer TrackAdabas(time.Now(), adabas)
 	s := adabas.status
 	s.lock.Lock()
 	defer s.lock.Unlock()

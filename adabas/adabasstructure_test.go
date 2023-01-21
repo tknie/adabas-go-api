@@ -41,13 +41,22 @@ func TestAcbx(t *testing.T) {
 	assert.Equal(t, "ACBX:\n  CmdCode:     CmdId: 41 42 78 6e  [ABxn] [...>]\n  Dbid: 1  Filenr: 0  Responsecode: 148 Subcode: 0\n  Isn:  0  ISN Lower Limit:  0 ISN Quantity:  0\n  CmdOption: 20 20 20 20 20 20 20 20  [        ] [........]\n  Add1: 20 20 20 20 20 20 20 20  [        ] [........]\n  Add2: 20 20 20 20  [    ] [....]\n  Add3: 00 00 00 00 00 00 00 00  [........] [........]\n  Add4: 00 00 00 00 00 00 00 00  [........] [........]\n  Add5: 00 00 00 00 00 00 00 00  [........] [........]\n  Add6: 00 00 00 00 00 00 00 00  [........] [........]\n  User Area: 00000000000000000000000000000000 [................] [................]\n", acbx.String())
 }
 
-func TestAID(t *testing.T) {
+func TestAIDGeneral(t *testing.T) {
 	aid := NewAdabasID()
 	aid.AddCredential("abc", "def")
 	assert.Equal(t, "abc", aid.user)
 	assert.Equal(t, "def", aid.pwd)
 	fmt.Println(aid)
 	aid.isOpen("abc")
+	aid.AdaID.Timestamp = 1664960284084192
+	aid.SetID(3326887813)
+	aid.SetHost("linuxhost")
+	aid.SetUser("administrator")
+	fmt.Println(aid.String())
+	assert.Equal(t, "40b38c69e6344b1e39b0397884fee4d0", aid.MD5())
+	aid.SetID(1926887813)
+	fmt.Println(aid.String())
+	assert.Equal(t, "55319d46fc050ec6262b6d438d5b62cc", aid.MD5())
 }
 
 func TestAIDClone(t *testing.T) {

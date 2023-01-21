@@ -32,7 +32,7 @@ type structure struct {
 	entries    []interface{}
 }
 
-// parseMap Adabas read parser of one Map definition used during read
+// structParser Adabas read parser of one structure definition used during read
 func structParser(adabasRequest *adatypes.Request, x interface{}) error {
 	structResult := x.(*structure)
 	adatypes.Central.Log.Debugf("Got ISN: %d", adabasRequest.Isn)

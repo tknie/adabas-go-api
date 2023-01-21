@@ -25,6 +25,7 @@ import (
 	"math"
 	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -56,6 +57,7 @@ var onceBody = func() {
 //   - Database id: 23
 //   - Adabas TCP on port 60023:  23(adatcp://pchost:60023)
 //   - Adabas Entire Network (Java only): 23(tcpip://pchost:50001)
+//
 // The connection string must contain:
 //   - To access database classic targets
 //     acj;target=<database url>
@@ -72,6 +74,7 @@ func NewConnection(connectionString string) (*Connection, error) {
 //   - Database id: 23
 //   - Adabas TCP on port 60023:  23(adatcp://pchost:60023)
 //   - Adabas Entire Network (Java only): 23(tcpip://pchost:50001)
+//
 // The connection string must contain:
 //   - To access database classic targets
 //     acj;target=<database url>
@@ -756,4 +759,21 @@ func (connection *Connection) GetAdabasInformation() string {
 	}
 	return "v" + connection.adabasToData.Version() + "," +
 		connection.adabasToData.Platform()
+}
+
+// GetMaps get Adabas information
+func (connection *Connection) GetMaps() ([]string, error) {
+	if connection.adabasToMap == nil || connection.repository == nil {
+		return nil, fmt.Errorf("connection not initialized correctly")
+	}
+	err := connection.repository.LoadMapRepository(connection.adabasToMap)
+	if err != nil {
+		return nil, err
+	}
+	maps := make([]string, 0)
+	for m := range connection.repository.mapNames {
+		maps = append(maps, m)
+	}
+	sort.Strings(maps)
+	return maps, nil
 }

@@ -21,11 +21,15 @@ package adabas
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tknie/adabas-go-api/adatypes"
 )
+
+const maxMaps = 20
 
 func TestMapRepositoryReadAll(t *testing.T) {
 	initTestLogWithFile(t, "map_repositories.log")
@@ -67,4 +71,115 @@ func TestMapRepositoryRead(t *testing.T) {
 	x := employeeMap.fieldMap["AA"]
 	assert.NotNil(t, x)
 	// fmt.Printf("%#v", x)
+}
+
+func BenchmarkReadMapOld(b *testing.B) {
+	initLogWithFile("map_repositories_bench.log")
+
+	adatypes.Central.Log.Infof("TEST: %s", b.Name())
+	adabas, _ := NewAdabas(23)
+	defer adabas.Close()
+	mr := NewMapRepository(adabas, 4)
+	baseMap, err := mr.SearchMap(adabas, "EMPLOYEES-NAT-DDM")
+	if !assert.NoError(b, err) {
+		return
+	}
+	createMaps(b, baseMap)
+	_, err = mr.LoadAllMaps(adabas)
+	if !assert.NoError(b, err) {
+		return
+	}
+	b.ResetTimer()
+	adabas2, _ := NewAdabas(23)
+	defer adabas2.Close()
+	for i := 0; i < b.N; i++ {
+		index := b.N % maxMaps
+		name := "Test" + strconv.Itoa(index)
+		m, err2 := mr.readAdabasMap(adabas2, name)
+		if !assert.NoError(b, err2) {
+			return
+		}
+		assert.Equal(b, name, m.Name)
+	}
+	defer cleanup(b, baseMap)
+}
+
+func createMaps(b *testing.B, baseMap *Map) {
+	cleanup(b, baseMap)
+	for i := 0; i < maxMaps; i++ {
+		baseMap.Name = "Test" + strconv.Itoa(i)
+		err := baseMap.Store()
+		if !assert.NoError(b, err) {
+			return
+		}
+	}
+}
+
+func cleanup(b *testing.B, baseMap *Map) {
+	for i := 0; i < maxMaps; i++ {
+		baseMap.Name = "Test" + strconv.Itoa(i)
+		baseMap.Delete()
+	}
+}
+
+func readMap(t *testing.B, read *ReadRequest, name string) *Map {
+	result, rErr := read.ReadLogicalWith("RN=" + name)
+	if !assert.NoError(t, rErr) {
+		return nil
+	}
+	if !assert.True(t, len(result.Data) == 1, name) {
+		return nil
+	}
+	if !assert.NotNil(t, result.Data[0], name) {
+		return nil
+	}
+	return result.Data[0].(*Map)
+
+}
+
+func BenchmarkReadMapNew(b *testing.B) {
+	initLogWithFile("map_repositories_bench.log")
+
+	adatypes.Central.Log.Infof("TEST: %s", b.Name())
+
+	connection, cerr := NewConnection("acj;inmap=23,4")
+	if !assert.NoError(b, cerr) {
+		return
+	}
+	defer connection.Close()
+
+	read, err := connection.CreateMapReadRequest(&Map{TypeID: 77})
+	if !assert.NoError(b, err) {
+		return
+	}
+	baseMap := readMap(b, read, "EMPLOYEES-NAT-DDM")
+	if !assert.NotNil(b, baseMap) {
+		return
+	}
+	if strings.Trim(baseMap.DataURL, " ") == "" {
+		baseMap.DataURL = "23"
+	}
+	url, err := NewURL(baseMap.DataURL)
+	if !assert.NoError(b, err) {
+		return
+	}
+	baseMap.Data = &DatabaseURL{*url, Fnr(baseMap.File)}
+
+	mr := NewMapRepository(connection.adabasToData, 4)
+	baseMap.Repository = &mr.DatabaseURL
+
+	createMaps(b, baseMap)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		index := b.N % maxMaps
+		name := "Test" + strconv.Itoa(index)
+		m := readMap(b, read, name)
+		if !assert.NotNil(b, m) {
+			return
+		}
+		assert.Equal(b, name, m.Name)
+		mr.AddMapToCache(name, m)
+	}
+	defer cleanup(b, baseMap)
 }

@@ -411,7 +411,9 @@ func generateFormatBufferField(adabasRequest *Request, adaType IAdaType) {
 			}
 		}
 	} else {
-		Central.Log.Infof("Unknown FB generator: %v", adaType.Name())
+		if Central.IsDebugLevel() {
+			Central.Log.Debugf("Unknown FB generator: %v", adaType.Name())
+		}
 	}
 
 }
@@ -543,14 +545,21 @@ func (def *Definition) CreateAdabasRequest(parameter *AdabasRequestParameter) (a
 // all data into the given definition value tree, corresponding to the
 // field definition of the concurrent field
 func (adabasRequest *Request) ParseBuffer(count *uint64, x interface{}) (responseCode uint32, err error) {
-	Central.Log.Debugf("Parse Adabas request buffers avail.=%v", (adabasRequest.Definition.Values != nil))
+	debug := Central.IsDebugLevel()
+	if debug {
+		Central.Log.Debugf("Parse Adabas request buffers avail.=%v", (adabasRequest.Definition.Values != nil))
+	}
 	// If parser is available, use the parser to extract content
 	if adabasRequest.Parser != nil {
-		Central.Log.Debugf("Parser method found")
+		if debug {
+			Central.Log.Debugf("Parser method found")
+		}
 		var multifetchHelper *BufferHelper
 		nrMultifetchEntries := uint32(1)
 		if adabasRequest.Multifetch > 1 {
-			Central.Log.Debugf("Multifetch %d", adabasRequest.Multifetch)
+			if debug {
+				Central.Log.Debugf("Multifetch %d", adabasRequest.Multifetch)
+			}
 			multifetchHelper = adabasRequest.MultifetchBuffer
 			nrMultifetchEntries, err = multifetchHelper.ReceiveUInt32()
 			if err != nil {
@@ -562,7 +571,9 @@ func (adabasRequest *Request) ParseBuffer(count *uint64, x interface{}) (respons
 				return 0, NewGenericError(177)
 			}
 		}
-		Central.Log.Debugf("Nr Multifetch entries %d", nrMultifetchEntries)
+		if debug {
+			Central.Log.Debugf("Nr Multifetch entries %d", nrMultifetchEntries)
+		}
 		for nrMultifetchEntries > 0 {
 			(*count)++
 			if multifetchHelper != nil {
@@ -577,7 +588,9 @@ func (adabasRequest *Request) ParseBuffer(count *uint64, x interface{}) (respons
 				}
 			}
 
-			Central.Log.Debugf("Parse Buffer .... values avail.=%v", (adabasRequest.Definition.Values != nil))
+			if debug {
+				Central.Log.Debugf("Parse Buffer .... values avail.=%v", (adabasRequest.Definition.Values != nil))
+			}
 			adabasRequest.Option.LowerLimit = adabasRequest.IsnLowerLimit
 			// Parse the received request
 			prefix := fmt.Sprintf("/image/%s/%d/", adabasRequest.Reference, adabasRequest.Isn)
@@ -585,16 +598,20 @@ func (adabasRequest *Request) ParseBuffer(count *uint64, x interface{}) (respons
 			if err != nil {
 				return
 			}
-			adabasRequest.Definition.DumpValues(true)
-			Central.Log.Debugf("Ready parse buffer .... %p values avail.=%v", adabasRequest.Definition, (adabasRequest.Definition.Values == nil))
+			if debug {
+				adabasRequest.Definition.DumpValues(true)
+				Central.Log.Debugf("Ready parse buffer .... %p values avail.=%v", adabasRequest.Definition, (adabasRequest.Definition.Values == nil))
+			}
 			if adabasRequest.Caller != nil {
 				err = adabasRequest.Caller.SendSecondCall(adabasRequest, x)
 				if err != nil {
 					return
 				}
 			}
-			adabasRequest.Definition.DumpValues(true)
-			Central.Log.Debugf("Found parser .... values avail.=%v", (adabasRequest.Definition.Values == nil))
+			if debug {
+				adabasRequest.Definition.DumpValues(true)
+				Central.Log.Debugf("Found parser .... values avail.=%v", (adabasRequest.Definition.Values == nil))
+			}
 			err = adabasRequest.Parser(adabasRequest, x)
 			if err != nil {
 				return
@@ -603,7 +620,9 @@ func (adabasRequest *Request) ParseBuffer(count *uint64, x interface{}) (respons
 
 			// If multifetch on, create values for next parse step, only possible on read calls
 			if nrMultifetchEntries > 0 {
-				Central.Log.Debugf("Create multifetch values")
+				if debug {
+					Central.Log.Debugf("Create multifetch values")
+				}
 				//adabasRequest.Definition.Values = nil
 				err = adabasRequest.Definition.CreateValues(false)
 				if err != nil {
@@ -611,9 +630,13 @@ func (adabasRequest *Request) ParseBuffer(count *uint64, x interface{}) (respons
 				}
 			}
 		}
-		Central.Log.Debugf("Parser ended")
+		if debug {
+			Central.Log.Debugf("Parser ended")
+		}
 	} else {
-		Central.Log.Debugf("Found no parser")
+		if debug {
+			Central.Log.Debugf("Found no parser")
+		}
 	}
 	return
 }
