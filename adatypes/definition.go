@@ -116,7 +116,7 @@ func (def *Definition) ParseBuffer(helper *BufferHelper, option *BufferOption, p
 			Central.Log.Debugf("Parse buffer values... avail.=%v", (def.Values != nil))
 		}
 		x := parserBufferTr{helper: helper, option: option, prefix: prefix, definition: def}
-		t := TraverserValuesMethods{EnterFunction: parseBufferValues}
+		t := TraverserValuesMethods{CreateValues: true, EnterFunction: parseBufferValues}
 		res, err = def.TraverseValues(t, &x)
 		if err != nil {
 			Central.Log.Debugf("Error parsing buffer values... %v", err)

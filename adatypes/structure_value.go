@@ -255,7 +255,7 @@ func (value *StructureValue) parsePeriodGroup(helper *BufferHelper, option *Buff
 			helper.offset, helper.offset, option.NeedSecondCall)
 	}
 	/* Evaluate the fields which need to be parsed in the period group */
-	tm := TraverserValuesMethods{EnterFunction: evaluateFieldNames}
+	tm := TraverserValuesMethods{CreateValues: true, EnterFunction: evaluateFieldNames}
 	efns := &evaluateFieldNameStructure{namesMap: make(map[string]bool), second: option.SecondCall}
 	res, err = value.Traverse(tm, efns)
 	if Central.IsDebugLevel() {

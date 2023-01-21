@@ -73,6 +73,7 @@ func (def *Definition) TraverseTypes(t TraverserMethods, activeTree bool, x inte
 
 // TraverserValuesMethods structure for Traverser values
 type TraverserValuesMethods struct {
+	CreateValues    bool
 	PrepareFunction PrepareTraverser
 	EnterFunction   TraverserValues
 	LeaveFunction   TraverserValues
@@ -81,7 +82,7 @@ type TraverserValuesMethods struct {
 
 // TraverseValues traverse through the tree of values calling a callback method
 func (def *Definition) TraverseValues(t TraverserValuesMethods, x interface{}) (ret TraverseResult, err error) {
-	if def.Values == nil {
+	if def.Values == nil && t.CreateValues {
 		Central.Log.Debugf("Init create values")
 		err = def.CreateValues(false)
 		if err != nil {
@@ -201,7 +202,7 @@ func dumpValuesEnterTrav(adaValue IAdaValue, x interface{}) (TraverseResult, err
 func (def *Definition) DumpValues(doLog bool) {
 	var buffer bytes.Buffer
 	Central.Log.Debugf("Dump all values")
-	t := TraverserValuesMethods{EnterFunction: dumpValuesEnterTrav}
+	t := TraverserValuesMethods{CreateValues: false, EnterFunction: dumpValuesEnterTrav}
 	_, err := def.TraverseValues(t, &buffer)
 	if err != nil {
 		Central.Log.Debugf("Dump values error: %v", err)

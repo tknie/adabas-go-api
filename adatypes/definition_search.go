@@ -99,7 +99,7 @@ func (def *Definition) Search(fieldName string) IAdaValue {
 		}
 	}
 	Central.Log.Debugf("Indexless search of %#v", x)
-	t := TraverserValuesMethods{EnterFunction: traverseSearchValueByName}
+	t := TraverserValuesMethods{CreateValues: true, EnterFunction: traverseSearchValueByName}
 	_, err := def.TraverseValues(t, x)
 	if err == nil {
 		return x.found
