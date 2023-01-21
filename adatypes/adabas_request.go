@@ -125,7 +125,7 @@ func searchRequestValue(adaValue IAdaValue, x interface{}) (TraverseResult, erro
 // GetValue get the value for string with name
 func (adabasRequest *Request) GetValue(name string) (IAdaValue, error) {
 	vs := &valueSearch{name: name}
-	tm := TraverserValuesMethods{EnterFunction: searchRequestValue}
+	tm := TraverserValuesMethods{CreateValues: true, EnterFunction: searchRequestValue}
 	if adabasRequest.Definition == nil {
 		return nil, NewGenericError(26)
 	}
@@ -519,7 +519,8 @@ func (def *Definition) CreateAdabasRequest(parameter *AdabasRequestParameter) (a
 
 	if parameter.Store || parameter.SecondCall > 0 || def.Values != nil {
 		Central.Log.Debugf("Create defined on values format buffer. Init Buffer: %s second=%v", adabasRequest.FormatBuffer.String(), parameter.SecondCall)
-		t := TraverserValuesMethods{EnterFunction: formatBufferTraverserEnter, LeaveFunction: formatBufferTraverserLeave}
+		t := TraverserValuesMethods{CreateValues: true, EnterFunction: formatBufferTraverserEnter,
+			LeaveFunction: formatBufferTraverserLeave}
 		_, err = def.TraverseValues(t, adabasRequest)
 		if err != nil {
 			return

@@ -534,7 +534,7 @@ func copyData(adabasRequest *adatypes.Request, x interface{}) (err error) {
 		fmt.Printf("Error creating record %v\n", err)
 		return
 	}
-	tm := adatypes.TraverserValuesMethods{EnterFunction: copyRecordData}
+	tm := adatypes.TraverserValuesMethods{CreateValues: true, EnterFunction: copyRecordData}
 	_, err = adabasRequest.Definition.TraverseValues(tm, record)
 	if err != nil {
 		return err

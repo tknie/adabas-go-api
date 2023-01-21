@@ -185,7 +185,7 @@ func (def *Definition) SearchByIndex(fieldName string, index []uint32, create bo
 					}
 				default:
 				}
-				tvm := TraverserValuesMethods{EnterFunction: traverseSearchValueByName, LeaveFunction: traverseSearchValueByNameEnd}
+				tvm := TraverserValuesMethods{CreateValues: true, EnterFunction: traverseSearchValueByName, LeaveFunction: traverseSearchValueByNameEnd}
 				_, err = strv.Traverse(tvm, &x)
 				if err == nil {
 					if x.found != nil {

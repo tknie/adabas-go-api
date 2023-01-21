@@ -396,7 +396,7 @@ func TestFieldType(t *testing.T) {
 		fmt.Println("Error reading records", rerr)
 		return
 	}
-	// tv := adatypes.TraverserValuesMethods{PrepareFunction: dumpFieldTypeTestPrepare, EnterFunction: dumpFieldTypeValues}
+	// tv := adatypes.TraverserValuesMethods{CreateValues:true,PrepareFunction: dumpFieldTypeTestPrepare, EnterFunction: dumpFieldTypeValues}
 	// _, err = result.TraverseValues(tv, nil)
 	// if !assert.NoError(t, err) {
 	// 	fmt.Println("Error traversing records", err)

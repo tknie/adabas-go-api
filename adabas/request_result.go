@@ -157,7 +157,7 @@ func traverseDumpRecord(adaValue adatypes.IAdaValue, x interface{}) (adatypes.Tr
 // DumpValues traverse through the tree of values calling a callback method
 func (Response *Response) DumpValues() (err error) {
 	var buffer bytes.Buffer
-	t := adatypes.TraverserValuesMethods{PrepareFunction: prepareRecordDump, EnterFunction: traverseDumpRecord}
+	t := adatypes.TraverserValuesMethods{CreateValues: true, PrepareFunction: prepareRecordDump, EnterFunction: traverseDumpRecord}
 	_, err = Response.TraverseValues(t, &buffer)
 	fmt.Println("Dump all result values")
 	fmt.Printf("%s", buffer.String())
@@ -212,7 +212,7 @@ func (Response *Response) TraverseValues(t adatypes.TraverserValuesMethods, x in
 // String string representation of the repsonse of the request
 func (Response *Response) String() string {
 	var buffer bytes.Buffer
-	t := adatypes.TraverserValuesMethods{PrepareFunction: prepareRecordDump, EnterFunction: traverseDumpRecord}
+	t := adatypes.TraverserValuesMethods{CreateValues: true, PrepareFunction: prepareRecordDump, EnterFunction: traverseDumpRecord}
 	_, _ = Response.TraverseValues(t, &buffer)
 	return buffer.String()
 }
@@ -243,7 +243,7 @@ func traverseMarshalXMLEnd(adaValue adatypes.IAdaValue, x interface{}) (adatypes
 func (Response *Response) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	x := xml.StartElement{Name: xml.Name{Local: "Response"}}
 	_ = e.EncodeToken(x)
-	tm := adatypes.TraverserValuesMethods{EnterFunction: traverseMarshalXML, LeaveFunction: traverseMarshalXMLEnd}
+	tm := adatypes.TraverserValuesMethods{CreateValues: true, EnterFunction: traverseMarshalXML, LeaveFunction: traverseMarshalXMLEnd}
 	if adatypes.Central.IsDebugLevel() {
 		adatypes.Central.Log.Debugf("Go through records -> %d", len(Response.Values))
 	}
@@ -442,7 +442,8 @@ func (Response *Response) MarshalJSON() ([]byte, error) {
 	if adatypes.Central.IsDebugLevel() {
 		adatypes.Central.Log.Debugf("Marshal JSON go through records -> %d", len(Response.Values))
 	}
-	tm := adatypes.TraverserValuesMethods{EnterFunction: traverseMarshalJSON, LeaveFunction: traverseMarshalJSONEnd,
+	tm := adatypes.TraverserValuesMethods{CreateValues: true, EnterFunction: traverseMarshalJSON,
+		LeaveFunction:   traverseMarshalJSONEnd,
 		ElementFunction: traverseElementMarshalJSON}
 	req.stack = adatypes.NewStack()
 

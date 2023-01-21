@@ -1029,7 +1029,7 @@ func TestConnectionReadMap(t *testing.T) {
 	if assert.True(t, len(result.Values) > 0) {
 		fmt.Println("Result data:")
 		record := result.Values[0]
-		tm := adatypes.TraverserValuesMethods{EnterFunction: registerTestedValuesAvailable}
+		tm := adatypes.TraverserValuesMethods{CreateValues: true, EnterFunction: registerTestedValuesAvailable}
 		tvc := &testedValueChecker{t: t}
 		tvc.tvcMap = map[string]*testedValue{
 			"AA": {shortName: "AA", longName: "PERSONNEL-ID", length: 8, index: 1},

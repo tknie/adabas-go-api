@@ -340,7 +340,7 @@ func (def *Definition) AdaptInterfaceFields(v reflect.Value, fm map[string][]str
 		return NewGenericError(179)
 	}
 	tp := &valueInterface{curVal: v.Elem(), valStack: NewStack(), fieldNames: fm}
-	t := TraverserValuesMethods{EnterFunction: traverseValueToInterface, LeaveFunction: traverseValueToInterfaceLeave}
+	t := TraverserValuesMethods{CreateValues: true, EnterFunction: traverseValueToInterface, LeaveFunction: traverseValueToInterfaceLeave}
 	_, err := def.TraverseValues(t, tp)
 	Central.Log.Debugf("Adapt interface ready: %v", err)
 	return err
