@@ -53,11 +53,6 @@ func newStructure(initType IAdaType) *StructureValue {
 	Central.Log.Debugf("Create new structure value %s", initType.Name())
 	value := StructureValue{adaValue: adaValue{adatype: initType}}
 	value.elementMap = make(map[uint32]*structureElement)
-	switch initType.Type() {
-	case FieldTypeGroup:
-	//	value.initSubValues(0, 0, false)
-	default:
-	}
 	return &value
 }
 

@@ -44,6 +44,8 @@ const MaxDatabasesID = 65536
 const adaEmptOpt = ' '
 const adaFdtXOpt = 'X'
 
+const outputCBFormat = "CB: %s"
+
 //type adabasOption uint32
 
 // Driver driver interface for different TCP/IP based connections
@@ -1183,7 +1185,7 @@ func (adabas *Adabas) DeleteIsn(fileNr Fnr, isn adatypes.Isn) (err error) {
 	// Error received from Adabas
 	if adabas.Acbx.Acbxrsp != AdaNormal {
 		adatypes.Central.Log.Errorf("Error delete Isn: %s", adabas.getAdabasMessage())
-		adatypes.Central.Log.Errorf("CB: %s", adabas.Acbx.String())
+		adatypes.Central.Log.Errorf(outputCBFormat, adabas.Acbx.String())
 		err = NewError(adabas)
 		return
 	}
@@ -1214,7 +1216,7 @@ func (adabas *Adabas) BackoutTransaction() (err error) {
 	// Error received from Adabas
 	if adabas.Acbx.Acbxrsp != AdaNormal {
 		adatypes.Central.Log.Errorf("Error reading data: %s", adabas.getAdabasMessage())
-		adatypes.Central.Log.Errorf("CB: %s", adabas.Acbx.String())
+		adatypes.Central.Log.Errorf(outputCBFormat, adabas.Acbx.String())
 		err = NewError(adabas)
 		return
 	}
@@ -1246,7 +1248,7 @@ func (adabas *Adabas) EndTransaction() (err error) {
 	// Error received from Adabas
 	if adabas.Acbx.Acbxrsp != AdaNormal {
 		adatypes.Central.Log.Errorf("Error end transaction: %s", adabas.getAdabasMessage())
-		adatypes.Central.Log.Errorf("CB: %s", adabas.Acbx.String())
+		adatypes.Central.Log.Errorf(outputCBFormat, adabas.Acbx.String())
 		err = NewError(adabas)
 		return
 	}
