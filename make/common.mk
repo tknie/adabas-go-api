@@ -72,7 +72,8 @@ $(EXECS): $(OBJECTS) ; $(info $(M) building executable $(@:$(BIN)/%=%)…) @ ## 
 cleanModules:  ; $(info $(M) cleaning modules) @ ## Build program binary
 ifneq ("$(wildcard $(GOPATH)/pkg/mod)","")
 	$Q cd $(CURDIR) &&  \
-	    CGO_CFLAGS="$(CGO_CFLAGS)" CGO_LDFLAGS="$(CGO_LDFLAGS) $(CGO_EXT_LDFLAGS)" $(GO) clean -modcache -cache ./...
+	    CGO_CFLAGS="$(CGO_CFLAGS)" CGO_LDFLAGS="$(CGO_LDFLAGS) $(CGO_EXT_LDFLAGS)" $(GO) clean -modcache -cache
+	    CGO_CFLAGS="$(CGO_CFLAGS)" CGO_LDFLAGS="$(CGO_LDFLAGS) $(CGO_EXT_LDFLAGS)" $(GO) clean ./...
 endif
 
 $(LOGPATH):
