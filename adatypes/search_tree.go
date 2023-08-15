@@ -860,7 +860,7 @@ func appendNumericValue(buffer *bytes.Buffer, v string) error {
 			}
 			if va > math.MaxUint32 {
 				Central.Log.Debugf("Value %d is greater then maximum\n", va)
-				return fmt.Errorf("value is greater then maximum %v>%v", va, math.MaxUint32)
+				return fmt.Errorf("value is greater then maximum %v>MAXINT", va)
 			}
 			if va > 0 {
 				bs := make([]byte, 4)
