@@ -24,7 +24,11 @@ package adabas
 
 import (
 	"fmt"
+	"os"
+	"os/user"
+	"sync/atomic"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/tknie/adabas-go-api/adatypes"
@@ -39,6 +43,37 @@ var (
 
 var disableInterface = false
 
+// NewAdabasID create a new unique Adabas ID instance using static data. Instead
+// using the current process id a generate unique time stamp and counter version
+// of the pid is used.
+func NewAdabasID() *ID {
+	AdaID := AID{level: 3, size: adabasIDSize}
+	aid := ID{AdaID: &AdaID, connectionMap: make(map[string]*Status)}
+	//	C.lnk_get_adabas_id(adabasIDSize, (*C.uchar)(unsafe.Pointer(&AdaID)))
+	curUser, err := user.Current()
+	if err != nil {
+		adatypes.Central.Log.Debugf("Error evaluing user")
+		copy(AdaID.User[:], ([]byte("Unknown "))[:8])
+	} else {
+		adatypes.Central.Log.Debugf("Create new ID(local) with %s", curUser.Username)
+		copy(AdaID.User[:], ([]byte(curUser.Username + "        "))[:8])
+	}
+	host, err := os.Hostname()
+	if err != nil {
+		adatypes.Central.Log.Debugf("Error evaluing host")
+		copy(AdaID.Node[:], ([]byte("Unknown"))[:8])
+	} else {
+		adatypes.Central.Log.Debugf("Current host is %s", curUser)
+		copy(AdaID.Node[:], ([]byte(host + "        "))[:8])
+	}
+	id := atomic.AddUint32(&idCounter, 1)
+	adatypes.Central.Log.Debugf("Create new ID(local) with %v", AdaID.Node)
+	AdaID.Timestamp = uint64(time.Now().UnixNano() / 1000)
+	AdaID.Pid = uint32((AdaID.Timestamp - (AdaID.Timestamp % 100)) + uint64(id))
+	adatypes.Central.Log.Debugf("Create Adabas ID: %d -> %s", AdaID.Pid, aid.String())
+	return &aid
+}
+
 // setAdabasID set the Adabas ID Windows API Call to call
 func setAdabasID(id *ID) error {
 	ret, _, errno := adabasIdFunc.Call(
@@ -51,7 +86,7 @@ func setAdabasID(id *ID) error {
 }
 
 // CallAdabas uses the Adabas Windows API Call to call
-func callAdabas(acbx *Acbx, abd []*Buffer) error {
+func (adabas *Adabas) CallAdabas(acbx *Acbx, abd []*Buffer) error {
 	defer TimeTrack(time.Now(), "Call adabas(Windows)", adabas)
 	defer TrackAdabas(time.Now(), adabas)
 	for _, ab := range abd {
