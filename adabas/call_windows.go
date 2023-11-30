@@ -1,5 +1,5 @@
-//go:build !adalnk && windows
-// +build !adalnk,windows
+//go:build adalnk && cgo && windows
+// +build adalnk,cgo,windows
 
 /*
 * Copyright © 2018-2022 Software AG, Darmstadt, Germany and/or its licensors
