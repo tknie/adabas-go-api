@@ -53,6 +53,12 @@ func NewSuperType(name string, option byte) *AdaSuperType {
 		}
 		superType.AddOption(FieldOptionPE)
 	}
+	if (option & 0x1) > 0 {
+		if Central.IsDebugLevel() {
+			Central.Log.Debugf("%s super/sub descriptor found UQ", name)
+		}
+		superType.AddOption(FieldOptionUQ)
+	}
 	if (option & 0x10) > 0 {
 		superType.AddOption(FieldOptionNU)
 	}

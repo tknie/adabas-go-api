@@ -221,7 +221,7 @@ func createFieldDefinitionTable(fdtDef *adatypes.Definition) (definition *adatyp
 			}
 		case fieldIdentifierPhonetic.code():
 			if debug {
-				adatypes.Central.Log.Debugf("Found Super/Sub field %c", value.Value().(byte))
+				adatypes.Central.Log.Debugf("Found Phonetic field %c", value.Value().(byte))
 			}
 			fieldType, err = createPhoneticType(fdt, index)
 			if err != nil {
