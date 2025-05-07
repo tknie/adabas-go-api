@@ -9,8 +9,8 @@ require (
 	github.com/pkg/profile v1.7.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/zap v1.27.0
-	golang.org/x/net v0.36.0
-	golang.org/x/text v0.22.0
+	golang.org/x/net v0.38.0
+	golang.org/x/text v0.23.0
 )
 
 require (
